@@ -33,4 +33,10 @@ class Project extends Model
     {
         return $this->belongsTo(Team::class, 'team_id');
     }
+
+    // Define the relationship with campaigns
+    public function campaigns()
+    {
+        return $this->hasMany(Campaign::class, 'project_code', 'project_code');
+    }
 }

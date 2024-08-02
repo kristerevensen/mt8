@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\DataForSEOController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Foundation\Application;
@@ -23,9 +24,12 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::resource('projects', ProjectController::class);
+    Route::resource('campaigns', CampaignController::class);
 });
 
-Route::resource('projects', ProjectController::class);
+
 
 Route::get('/api/oppdater/locations', [DataForSEOController::class, 'getLocations']);
 Route::get('/api/oppdater/language', [DataForSEOController::class, 'getLanguages']);

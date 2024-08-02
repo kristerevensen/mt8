@@ -36,6 +36,10 @@ const isActiveProjects = () => {
   const currentUrl = usePage().url; // Hent den nåværende URL-en
   return currentUrl.startsWith("/projects");
 };
+const isActiveCampaigns = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/campaigns");
+};
 </script>
 
 <template>
@@ -70,6 +74,12 @@ const isActiveProjects = () => {
                   :active="isActiveProjects()"
                 >
                   Projects
+                </NavLink>
+                <NavLink
+                  :href="route('campaigns.index')"
+                  :active="isActiveCampaigns()"
+                >
+                  Campaigns
                 </NavLink>
               </div>
             </div>
