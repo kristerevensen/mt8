@@ -33,6 +33,11 @@ class CampaignLinkClicksTableSeeder extends Seeder
                     'referrer' => $faker->url,
                     'ip' => $faker->ipv4,
                     'platform' => $faker->randomElement(['Windows', 'Mac', 'Linux']),
+                    'browser' => $faker->randomElement(['Chrome', 'Firefox', 'Safari']),
+                    'device_type' => $faker->randomElement(['desktop', 'mobile', 'tablet']),
+                    'screen_resolution' => $faker->randomElement(['1920x1080', '1280x720', '2560x1440']),
+                    'language' => $faker->languageCode,
+                    'session_id' => $faker->uuid,
                     'link_token' => $link->link_token,
                 ]);
             }

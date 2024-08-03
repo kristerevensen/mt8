@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\CampaignLink;
+use App\Models\CampaignLinkClick;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -100,10 +102,22 @@ class CampaignController extends Controller
         // Fetch the campaign by ID and ensure it belongs to the authenticated user
         $campaign = Campaign::where('id', $id)->where('created_by', Auth::id())->firstOrFail();
 
-        // Fetch projects associated with the authenticated user
-        $projects = Project::where('owner_id', Auth::id())->get();
+        // Fetch links associated with the campaign
+        $links = CampaignLink::where('campaign_id', $campaign->id)
+            ->paginate(10); // Paginering av lenkene
+
+        // Fetch link clicks associated with the campaign
+        $clicks = CampaignLinkClick::whereIn('link_token', $links->pluck('link_token'))
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // Return data to the Inertia page
         return Inertia::render('Campaigns/Show', [
             'campaign' => $campaign,
+            'links' => $links,
+            'clicks' => $clicks,
         ]);
     }
 

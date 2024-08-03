@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('referrer')->nullable(); // Referrer URL
             $table->string('ip')->nullable(); // IP address
             $table->string('platform')->nullable(); // Platform or OS
+            $table->string('browser')->nullable(); // Browser name and version
+            $table->string('device_type')->nullable(); // Device type (desktop, mobile, tablet)
+            $table->string('screen_resolution')->nullable(); // Screen resolution
+            $table->string('language')->nullable(); // Preferred language
+            $table->string('session_id')->nullable(); // Session ID
             $table->string('link_token'); // Link token from campaign_links
             $table->timestamps(); // Timestamps for created_at and updated_at
 

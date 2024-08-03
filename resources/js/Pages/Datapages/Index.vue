@@ -125,31 +125,32 @@ function formatDateChart(dateString) {
 const chartData = ref([]);
 
 // Convert pageviews data to Google Charts format
-onMounted(() => {
-  if (props.pageviews && props.pageviews.original) {
-    chartData.value.push(["Date", "Pageviews"]);
-    props.pageviews.original.forEach((item) => {
-      chartData.value.push([formatDateChart(item.date), item.pageviews]);
-    });
-    google.charts.load("current", { packages: ["corechart"] });
-    google.charts.setOnLoadCallback(drawChart);
-  }
-});
+// onMounted(() => {
+//   if (props.pageviews && props.pageviews.original) {
+//     chartData.value.push(["Date", "Pageviews"]);
+//     props.pageviews.original.forEach((item) => {
+//       chartData.value.push([formatDateChart(item.date), item.pageviews]);
+//     });
+//     google.charts.load("current", { packages: ["corechart"] });
+//     google.charts.setOnLoadCallback(drawChart);
+//   }
+// });
 
-function drawChart() {
-  var data = google.visualization.arrayToDataTable(chartData.value);
+// function drawChart() {
+//   var data = google.visualization.arrayToDataTable(chartData.value);
 
-  var options = {
-    title: "Pageviews Trend",
-    curveType: "function",
-    legend: { position: "bottom" },
-  };
+//   var options = {
+//     title: "Pageviews Trend",
+//     curveType: "function",
+//     legend: { position: "bottom" },
+//   };
 
-  var chart = new google.visualization.LineChart(
-    document.getElementById("curve_chart")
-  );
-  chart.draw(data, options);
-}
+//   var chart = new google.visualization.LineChart(
+//     document.getElementById("curve_chart")
+//   );
+//   chart.draw(data, options);
+// }
+
 const tabs = [
   { name: "All Pages", href: "/pages", current: true },
   { name: "Technical", href: "/technical", current: false },
