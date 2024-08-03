@@ -115,7 +115,12 @@ class ProjectController extends Controller
     {
         $project = Project::where('project_code', $project_code)->firstOrFail();
         // Deserialize the project_category
-        $project->project_category = unserialize($project->project_category);
+        if ($project->project_category != null) {
+            $project->project_category = unserialize($project->project_category);
+        } else {
+            $project->project_category = null;
+        }
+
 
         // Hent den nåværende innloggede brukeren
         $user = Auth::user();

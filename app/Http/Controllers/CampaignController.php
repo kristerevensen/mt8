@@ -21,10 +21,10 @@ class CampaignController extends Controller
         $currentTeamId = $user->current_team_id;
 
         // Get projects associated with the current team
-        $projectIds = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
 
         // Fetch campaigns related to those projects
-        $campaigns = Campaign::whereIn('project_code', $projectIds)
+        $campaigns = Campaign::whereIn('project_code', $project_code)
             ->with('project')
             ->where('created_by', Auth::id())
             ->get();
@@ -39,8 +39,16 @@ class CampaignController extends Controller
      */
     public function create()
     {
-        // Fetch projects associated with the authenticated user
-        $projects = Project::where('owner_id', Auth::id())->get();
+        // Fetch campaigns for the project related to the user's current team
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+
+        // Get projects associated with the current team
+        $projects = Project::where('team_id', $currentTeamId)->pluck('project_code');
+
+        if (!$projects->count()) {
+            return redirect()->route('projects.create')->with('error', 'You need to create a project before you can create a campaign.');
+        }
 
         return Inertia::render('Campaigns/Create', [
             'projects' => $projects,
@@ -56,7 +64,6 @@ class CampaignController extends Controller
             'campaign_name' => 'required|string',
             'start' => 'nullable|date',
             'end' => 'nullable|date|after_or_equal:start',
-            'status' => 'boolean',
             'reporting' => 'boolean',
             'force_lowercase' => 'boolean',
             'utm_activated' => 'boolean',
@@ -88,22 +95,27 @@ class CampaignController extends Controller
     /**
      * Display the specified campaign.
      */
-    public function show(Campaign $campaign)
+    public function show($id)
     {
-        //$this->authorize('view', $campaign);
+        // Fetch the campaign by ID and ensure it belongs to the authenticated user
+        $campaign = Campaign::where('id', $id)->where('created_by', Auth::id())->firstOrFail();
 
+        // Fetch projects associated with the authenticated user
+        $projects = Project::where('owner_id', Auth::id())->get();
         return Inertia::render('Campaigns/Show', [
-            'campaign' => $campaign->load('project'),
+            'campaign' => $campaign,
         ]);
     }
 
     /**
      * Show the form for editing the specified campaign.
      */
-    public function edit(Campaign $campaign)
+    public function edit($id)
     {
-        //$this->authorize('update', $campaign);
+        // Fetch the campaign by ID and ensure it belongs to the authenticated user
+        $campaign = Campaign::where('id', $id)->where('created_by', Auth::id())->firstOrFail();
 
+        // Fetch projects associated with the authenticated user
         $projects = Project::where('owner_id', Auth::id())->get();
 
         return Inertia::render('Campaigns/Edit', [
@@ -115,13 +127,11 @@ class CampaignController extends Controller
     /**
      * Update the specified campaign in storage.
      */
-    public function update(Request $request, Campaign $campaign)
+    public function update(Request $request, $id)
     {
-        //$this->authorize('update', $campaign);
-
         $request->validate([
-            'campaign_name' => 'required|string|max:255',
-            'project_code' => 'required|exists:projects,project_code',
+            'campaign_name' => 'required|string',
+            'project_code' => 'required|string',
             'start' => 'nullable|date',
             'end' => 'nullable|date|after_or_equal:start',
             'status' => 'boolean',
@@ -132,20 +142,27 @@ class CampaignController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $campaign->update([
-            'campaign_name' => $request->campaign_name,
-            'project_code' => $this->getProjectCode($request),
-            'start' => $request->start,
-            'end' => $request->end,
-            'status' => $request->status ?? 0,
-            'reporting' => $request->reporting ?? 0,
-            'force_lowercase' => $request->force_lowercase ?? 0,
-            'utm_activated' => $request->utm_activated ?? 0,
-            'monitor_urls' => $request->monitor_urls ?? 0,
-            'description' => $request->description,
-        ]);
+        // Fetch the campaign by ID and ensure it belongs to the authenticated user
+        $campaign = Campaign::where('id', $id)->where('created_by', Auth::id())->firstOrFail();
 
-        return redirect()->route('campaigns.index')->with('success', 'Campaign updated successfully.');
+        // Update campaign properties
+        $campaign->campaign_name = $request->campaign_name;
+        $campaign->project_code = $this->getProjectCode($request);
+        $campaign->start = $request->start;
+        $campaign->end = $request->end;
+        $campaign->status = $request->status;
+        $campaign->reporting = $request->reporting;
+        $campaign->force_lowercase = $request->force_lowercase;
+        $campaign->utm_activated = $request->utm_activated;
+        $campaign->monitor_urls = $request->monitor_urls;
+        $campaign->description = $request->description;
+
+        // Save changes
+        if ($campaign->save()) {
+            return redirect()->route('campaigns.index')->with('success', 'Campaign updated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to update campaign.');
+        }
     }
 
     /**

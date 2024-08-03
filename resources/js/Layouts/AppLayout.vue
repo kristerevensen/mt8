@@ -40,6 +40,30 @@ const isActiveCampaigns = () => {
   const currentUrl = usePage().url; // Hent den nåværende URL-en
   return currentUrl.startsWith("/campaigns");
 };
+const isActivePages = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/pages");
+};
+const isActiveContent = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/content");
+};
+const isActiveTechnical = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/technical");
+};
+const isActiveRanking = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/ranking");
+};
+const isActiveKeywords = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/keywords");
+};
+const isActiveGrowth = () => {
+  const currentUrl = usePage().url; // Hent den nåværende URL-en
+  return currentUrl.startsWith("/growth");
+};
 </script>
 
 <template>
@@ -75,11 +99,38 @@ const isActiveCampaigns = () => {
                 >
                   Projects
                 </NavLink>
+                <NavLink :href="route('pages.index')" :active="isActivePages()">
+                  Pages
+                </NavLink>
+                <NavLink
+                  :href="route('keywords.index')"
+                  :active="isActiveKeywords()"
+                >
+                  Keywords
+                </NavLink>
+                <NavLink
+                  :href="route('technical.index')"
+                  :active="isActiveTechnical()"
+                >
+                  Technical
+                </NavLink>
+                <NavLink
+                  :href="route('content.index')"
+                  :active="isActiveContent()"
+                >
+                  Content
+                </NavLink>
                 <NavLink
                   :href="route('campaigns.index')"
                   :active="isActiveCampaigns()"
                 >
                   Campaigns
+                </NavLink>
+                <NavLink
+                  :href="route('growth.index')"
+                  :active="isActiveGrowth()"
+                >
+                  Growth
                 </NavLink>
               </div>
             </div>

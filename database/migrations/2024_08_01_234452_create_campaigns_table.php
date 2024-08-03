@@ -27,7 +27,7 @@ return new class extends Migration
             $table->text('description')->nullable(); // Description (nullable)
             $table->timestamps(); // Timestamps for created_at and updated_at
 
-            // Define foreign key constraint for project_code referencing projects.project_code
+            // Foreign key constraint for project_code referencing projects.project_code
             $table->foreign('project_code')->references('project_code')->on('projects')->onDelete('cascade');
         });
     }

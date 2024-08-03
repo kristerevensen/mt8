@@ -15,7 +15,19 @@ class TeamsTableSeeder extends Seeder
     public function run(): void
     {
         Team::create([
-            'name' => 'Default Team',
+            'name' => 'Mcminn Team',
+            'user_id' => 1, // Bruker ID fra UsersTableSeeder
+            'personal_team' => true,
+        ]);
+
+        Team::create([
+            'name' => 'Pixel & co Team',
+            'user_id' => 1, // Bruker ID fra UsersTableSeeder
+            'personal_team' => true,
+        ]);
+
+        Team::create([
+            'name' => 'Din firmabil Team',
             'user_id' => 1, // Bruker ID fra UsersTableSeeder
             'personal_team' => true,
         ]);

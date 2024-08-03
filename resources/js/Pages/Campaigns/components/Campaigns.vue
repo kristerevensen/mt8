@@ -35,7 +35,7 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Project Code
+                    Campaign  Code
                   </th>
                   <th
                     scope="col"
@@ -74,7 +74,7 @@
                     {{ item.campaign_name }}
                   </td>
                   <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                    {{ item.project_code }}
+                    {{ item.campaign_token }}
                   </td>
                   <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
                     Groups

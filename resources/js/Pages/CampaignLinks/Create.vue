@@ -1,26 +1,26 @@
 <script setup>
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { defineProps } from "vue";
+import CreateCampaignLinkForm from "@/Pages/CampaignLinks/components/CreateCampaignLinkForm.vue";
 
-// Define props to accept campaigns and projects from the parent component
 const props = defineProps({
-  campaign: Object,
-  projects: Array,
+  campaigns: Array,
 });
 </script>
 
 <template>
-  <Head title="Edit Campaign" />
-  <AppLayout title="Edit Campaign">
+  <Head title="Campaign Links" />
+  <AppLayout title="Campaign Links">
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
-        {{ campaign.campaign_name }}
+        Create Campaign Link
       </h2>
     </template>
     <div>
       <div class="py-10 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <!-- Pass the campaign and projects prop to the EditCampaignForm -->
+        <!-- Pass the campaigns prop to the CreateCampaignLinkForm -->
+        <CreateCampaignLinkForm :campaigns="campaigns" />
       </div>
     </div>
   </AppLayout>
