@@ -7,6 +7,8 @@ use App\Models\Campaign;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class CampaignLinkController extends Controller
 {
@@ -39,16 +41,20 @@ class CampaignLinkController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($campaignId = null)
     {
-        // Fetch the campaigns related to the current team
         $user = Auth::user();
-        $currentTeamId = $user->current_team_id;
 
-        // Get campaigns associated with the current team
-        $campaigns = Campaign::whereHas('project', function ($query) use ($currentTeamId) {
-            $query->where('team_id', $currentTeamId);
-        })->get();
+        if (is_null($campaignId)) {
+            // Get campaigns related to the current team
+            $currentTeamId = $user->current_team_id;
+
+            $campaigns = Campaign::whereHas('project', function ($query) use ($currentTeamId) {
+                $query->where('team_id', $currentTeamId);
+            })->get();
+            //dd($campaigns);
+        }
+
 
         return Inertia::render('CampaignLinks/Create', [
             'campaigns' => $campaigns,
@@ -61,24 +67,54 @@ class CampaignLinkController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'link_name' => 'required|string',
-            'url' => 'required|url',
+            'landing_page' => 'required|url', // Renamed to match the database field
             'campaign_id' => 'required|exists:campaigns,id',
+            'source' => 'nullable|string',
+            'medium' => 'nullable|string',
+            'term' => 'nullable|string',
+            'content' => 'nullable|string',
+            'custom_parameters' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
         $link = new CampaignLink();
-        $link->link_name = $request->link_name;
-        $link->url = $request->url;
+        $link->landing_page = $request->landing_page;
+        $link->link_token = Str::random(8); // Generate a unique link token
+        $link->project_code = $this->getProjectCode($request->campaign_id); // Assuming you have a method to get project code
         $link->campaign_id = $request->campaign_id;
+        $link->source = $request->source;
+        $link->medium = $request->medium;
+        $link->term = $request->term;
+        $link->content = $request->content;
+        $link->custom_parameters = $request->custom_parameters;
         $link->description = $request->description;
 
+        // Construct the tagged URL
+        $link->tagged_url = 'https://mttrack.link/' . $link->link_token;
+        $campaignToken = $this->getCampaignCode($link->campaign_id);
+
+        // Save the link and redirect
         if ($link->save()) {
-            return redirect()->route('campaign-links.index')->with('success', 'Link created successfully.');
+            return redirect()->route('campaigns.show', ['campaign' => $campaignToken])->with('success', 'Link created successfully.');
         } else {
             return redirect()->back()->with('error', 'Failed to create link.');
         }
     }
+
+    // Example method to get project code
+    private function getProjectCode($campaignId)
+    {
+        $campaign = Campaign::find($campaignId);
+        return $campaign ? $campaign->project_code : null;
+    }
+
+    // get campaign code from campaign id
+    private function getCampaignCode($campaignId)
+    {
+        $campaign = Campaign::where('id', $campaignId)->first();
+        return $campaign->campaign_token;
+    }
+
 
     /**
      * Display the specified resource.
@@ -95,9 +131,9 @@ class CampaignLinkController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit($linktoken)
     {
-        $link = CampaignLink::where('id', $id)->firstOrFail();
+        $link = CampaignLink::where('link_token', $linktoken)->firstOrFail();
 
         // Get campaigns related to the current team
         $user = Auth::user();
@@ -116,27 +152,34 @@ class CampaignLinkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, CampaignLink $campaignLink)
     {
         $request->validate([
-            'link_name' => 'required|string',
-            'url' => 'required|url',
+            'landing_page' => 'required|url',
             'campaign_id' => 'required|exists:campaigns,id',
+            'source' => 'nullable|string',
+            'medium' => 'nullable|string',
+            'term' => 'nullable|string',
+            'content' => 'nullable|string',
+            'custom_parameters' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
-        $link = CampaignLink::where('id', $id)->firstOrFail();
-        $link->link_name = $request->link_name;
-        $link->url = $request->url;
-        $link->campaign_id = $request->campaign_id;
-        $link->description = $request->description;
+        $campaignLink->update([
+            'landing_page' => $request->landing_page,
+            'campaign_id' => $request->campaign_id,
+            'source' => $request->source,
+            'medium' => $request->medium,
+            'term' => $request->term,
+            'content' => $request->content,
+            'custom_parameters' => $request->custom_parameters,
+            'description' => $request->description,
+        ]);
 
-        if ($link->save()) {
-            return redirect()->route('campaign-links.index')->with('success', 'Link updated successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Failed to update link.');
-        }
+        $campaignToken = $this->getCampaignCode($request->campaign_id);
+        return redirect()->route('campaigns.show', ['campaign' => $campaignToken])->with('success', 'Link created successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.

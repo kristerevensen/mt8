@@ -5,60 +5,59 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
-import { defineProps } from "vue";
 
+// Define the props to receive campaigns and the existing link data
 const props = defineProps({
-  link: Object,
-  campaigns: Array,
+  campaigns: Array, // List of campaigns to choose from
+  link: Object, // Existing campaign link data
 });
 
+// Set up the form using Inertia's useForm hook, pre-filling with existing link data
 const form = useForm({
-  link_name: props.link.link_name || "", // Link name
-  url: props.link.url || "", // URL
+  landing_page: props.link.landing_page || "", // Landing Page URL
+  source: props.link.source || "", // Source for UTM tracking
+  medium: props.link.medium || "", // Medium for UTM tracking
+  term: props.link.term || "", // Term for UTM tracking
+  content: props.link.content || "", // Content for UTM tracking
+  custom_parameters: props.link.custom_parameters || "", // Custom parameters for tracking
+  description: props.link.description || "", // Description of the link
   campaign_id: props.link.campaign_id || "", // Campaign ID
-  description: props.link.description || "", // Description
 });
 
+// Method to submit the form data for updating
 const submitForm = () => {
   form.put(route("campaign-links.update", props.link.id), {
-    onSuccess: () => alert("Link updated successfully!"),
-    onError: () => alert("There was an error updating the link"),
+    onSuccess: () => {
+      form.reset();
+      alert("Link updated successfully");
+    },
+    onError: () => alert("There was an error updating the link"), // Alert on error
   });
 };
 </script>
 
 <template>
   <FormSection @submitted="submitForm()">
-    <template #title> Edit Campaign Link Details </template>
+    <template #title>Edit Campaign Link Details</template>
 
     <template #description>
-      Edit the link associated with a campaign.
+      Update the details of this campaign link.
     </template>
 
     <template #form>
+      <!-- Landing Page -->
       <div class="col-span-6">
-        <InputLabel for="link_name" value="Link Name" />
+        <InputLabel for="landing_page" value="Landing Page" />
         <TextInput
-          id="link_name"
-          v-model="form.link_name"
-          type="text"
-          class="block w-full mt-1"
-          autofocus
-        />
-        <InputError :message="form.errors.link_name" class="mt-2" />
-      </div>
-
-      <div class="col-span-6">
-        <InputLabel for="url" value="URL" />
-        <TextInput
-          id="url"
-          v-model="form.url"
+          id="landing_page"
+          v-model="form.landing_page"
           type="url"
           class="block w-full mt-1"
         />
-        <InputError :message="form.errors.url" class="mt-2" />
+        <InputError :message="form.errors.landing_page" class="mt-2" />
       </div>
 
+      <!-- Campaign Selection -->
       <div class="col-span-6">
         <InputLabel for="campaign_id" value="Campaign" />
         <select
@@ -78,6 +77,67 @@ const submitForm = () => {
         <InputError :message="form.errors.campaign_id" class="mt-2" />
       </div>
 
+      <!-- Source for UTM tracking -->
+      <div class="col-span-3">
+        <InputLabel for="source" value="Source" />
+        <TextInput
+          id="source"
+          v-model="form.source"
+          type="text"
+          class="block w-full mt-1"
+        />
+        <InputError :message="form.errors.source" class="mt-2" />
+      </div>
+
+      <!-- Medium for UTM tracking -->
+      <div class="col-span-3">
+        <InputLabel for="medium" value="Medium" />
+        <TextInput
+          id="medium"
+          v-model="form.medium"
+          type="text"
+          class="block w-full mt-1"
+        />
+        <InputError :message="form.errors.medium" class="mt-2" />
+      </div>
+
+      <!-- Term for UTM tracking -->
+      <div class="col-span-3">
+        <InputLabel for="term" value="Term" />
+        <TextInput
+          id="term"
+          v-model="form.term"
+          type="text"
+          class="block w-full mt-1"
+        />
+        <InputError :message="form.errors.term" class="mt-2" />
+      </div>
+
+      <!-- Content for UTM tracking -->
+      <div class="col-span-3">
+        <InputLabel for="content" value="Content" />
+        <TextInput
+          id="content"
+          v-model="form.content"
+          type="text"
+          class="block w-full mt-1"
+        />
+        <InputError :message="form.errors.content" class="mt-2" />
+      </div>
+
+      <!-- Custom Parameters -->
+      <div class="col-span-6">
+        <InputLabel for="custom_parameters" value="Custom Parameters" />
+        <textarea
+          id="custom_parameters"
+          v-model="form.custom_parameters"
+          class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"
+          rows="3"
+        ></textarea>
+        <InputError :message="form.errors.custom_parameters" class="mt-2" />
+      </div>
+
+      <!-- Description -->
       <div class="col-span-6">
         <InputLabel for="description" value="Description" />
         <textarea

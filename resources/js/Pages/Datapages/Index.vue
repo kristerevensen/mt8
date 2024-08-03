@@ -1,14 +1,38 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Components/Paginator.vue";
-import { reactive, onMounted, ref } from "vue";
+import { reactive, onMounted, ref, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import NavLink from "@/Components/NavLink.vue";
 
+// Import vue-chartjs components
+import { Line } from "vue-chartjs";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+} from "chart.js";
+
+// Register necessary chart.js components
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement
+);
+
 const props = defineProps({
   pages: Object,
-  metrics: Object, // changed to Object as it seems to be a singular object
-  pageviews: Object,
+  metrics: Object,
+  pageviews: Array, // Array to match the received data structure
 });
 
 // Add the truncateUrl method here
@@ -59,26 +83,46 @@ onMounted(() => {
   }
 });
 
-if (!dateSelector.fromDate || !dateSelector.toDate) {
-  // Get today's date
-  let today = new Date();
+// Convert props.pageviews data to the required chart.js format
+const chartData = computed(() => {
+  const labels = [];
+  const data = [];
 
-  // Set toDate as yesterday
-  let toDate = new Date(today);
-  toDate.setDate(toDate.getDate() - 1);
+  if (props.pageviews && Array.isArray(props.pageviews)) {
+    props.pageviews.forEach((item) => {
+      labels.push(formatDateChart(item.date));
+      data.push(item.pageviews);
+    });
+  }
 
-  // Set fromDate as 28 days before yesterday
-  let fromDate = new Date(toDate);
-  fromDate.setDate(fromDate.getDate() - 27);
+  return {
+    labels, // Dates for x-axis
+    datasets: [
+      {
+        label: "Pageviews",
+        data, // Pageview counts for y-axis
+        borderColor: "#4f46e5", // Indigo
+        backgroundColor: "rgba(79, 70, 229, 0.1)",
+        fill: true,
+        tension: 0.1,
+      },
+    ],
+  };
+});
 
-  // Format dates to 'YYYY-MM-DD'
-  let formattedToDate = toDate.toISOString().split("T")[0];
-  let formattedFromDate = fromDate.toISOString().split("T")[0];
-
-  // Assign the default values
-  dateSelector.fromDate = formattedFromDate;
-  dateSelector.toDate = formattedToDate;
-}
+// Options for the Line Chart
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top",
+    },
+    title: {
+      display: true,
+      text: "Pageviews Trend",
+    },
+  },
+};
 
 // Method to submit date range and store in localStorage
 function submitDateRange() {
@@ -95,8 +139,6 @@ function submitDateRange() {
     from: dateSelector.fromDate,
     to: dateSelector.toDate,
   });
-
-  //console.log('Submitting:', dateSelector.fromDate, dateSelector.toDate);
 }
 
 function formatDateChart(dateString) {
@@ -122,35 +164,6 @@ function formatDateChart(dateString) {
   return formattedDate;
 }
 
-const chartData = ref([]);
-
-// Convert pageviews data to Google Charts format
-// onMounted(() => {
-//   if (props.pageviews && props.pageviews.original) {
-//     chartData.value.push(["Date", "Pageviews"]);
-//     props.pageviews.original.forEach((item) => {
-//       chartData.value.push([formatDateChart(item.date), item.pageviews]);
-//     });
-//     google.charts.load("current", { packages: ["corechart"] });
-//     google.charts.setOnLoadCallback(drawChart);
-//   }
-// });
-
-// function drawChart() {
-//   var data = google.visualization.arrayToDataTable(chartData.value);
-
-//   var options = {
-//     title: "Pageviews Trend",
-//     curveType: "function",
-//     legend: { position: "bottom" },
-//   };
-
-//   var chart = new google.visualization.LineChart(
-//     document.getElementById("curve_chart")
-//   );
-//   chart.draw(data, options);
-// }
-
 const tabs = [
   { name: "All Pages", href: "/pages", current: true },
   { name: "Technical", href: "/technical", current: false },
@@ -160,15 +173,15 @@ const tabs = [
 </script>
 
 <template>
-  <Head title="Edit Campaign Link" />
-  <AppLayout title="Edit Campaign Link">
+  <Head title="Pages" />
+  <AppLayout title="Pages">
     <div class="mt-5">
       <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="relative pb-5 border-b border-gray-200 sm:pb-0">
-          <div class="md:flex md:items-center md:justify-between">
-            <h3 class="text-base font-semibold leading-6 text-gray-900">
+          <div class="sm:flex-auto md:flex md:items-center md:justify-between">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">
               Pages
-            </h3>
+            </h1>
             <div
               class="flex mt-3 space-x-2 md:absolute md:right-0 md:top-5 md:mt-0"
             >
@@ -188,42 +201,6 @@ const tabs = [
               >
                 Data Period
               </button>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="sm:hidden">
-              <label for="current-tab" class="sr-only">Select a tab</label>
-              <select
-                id="current-tab"
-                name="current-tab"
-                class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
-              >
-                <option
-                  v-for="tab in tabs"
-                  :key="tab.name"
-                  :selected="tab.current"
-                >
-                  {{ tab.name }}
-                </option>
-              </select>
-              <NavLink href=""> Pages </NavLink>
-            </div>
-            <div class="hidden sm:block">
-              <nav class="flex -mb-px space-x-8">
-                <a
-                  v-for="tab in tabs"
-                  :key="tab.name"
-                  :href="tab.href"
-                  :class="[
-                    tab.current
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                    'whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium',
-                  ]"
-                  :aria-current="tab.current ? 'page' : undefined"
-                  >{{ tab.name }}</a
-                >
-              </nav>
             </div>
           </div>
         </div>
@@ -298,7 +275,8 @@ const tabs = [
         </div>
 
         <div class="mt-10 bg-white rounded-lg shadow sm:p-6">
-          <div id="curve_chart" style="width: 100%; height: 500px"></div>
+          <!-- Replace Google Chart with vue-chartjs -->
+          <Line :data="chartData" :options="chartOptions" />
         </div>
 
         <div

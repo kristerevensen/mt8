@@ -72,12 +72,20 @@ const clickOptions = {
   <Head title="Campaign Details" />
   <AppLayout title="Campaign Details">
     <template #header>
-      <h2 class="text-xl font-semibold leading-tight text-gray-800">
-        {{ campaign.campaign_name }}
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="mb-5 text-xl font-semibold leading-tight text-gray-800">
+          {{ campaign.campaign_name }}
+        </h2>
+        <Link
+          :href="`/campaign-links/create?campaign_token=${campaign.campaign_token}`"
+          class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
+        >
+          Add Campaign Link
+        </Link>
+      </div>
     </template>
     <div>
-      <div class="py-10 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div class="py-5 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <!-- Link Clicks Graph -->
         <div class="mb-8">
           <Line :data="clickData" :options="clickOptions" />
@@ -111,7 +119,7 @@ const clickOptions = {
                 <td class="px-4 py-2">{{ link.medium }}</td>
                 <td class="px-4 py-2">
                   <Link
-                    :href="`/campaign-links/${link.id}/edit`"
+                    :href="`/campaign-links/${link.link_token}/edit`"
                     class="text-indigo-600 hover:text-indigo-900"
                     >Edit</Link
                   >

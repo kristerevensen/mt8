@@ -35,7 +35,7 @@
                     scope="col"
                     class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Campaign  Code
+                    Campaign Code
                   </th>
                   <th
                     scope="col"
@@ -92,9 +92,11 @@
                     class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"
                   >
                     <Link
-                      :href="route('campaigns.show', item.id)"
+                      :href="route('campaigns.show', item.campaign_token)"
                       class="text-indigo-600 hover:text-indigo-900"
-                      >View<span class="sr-only"> {{ item.id }}</span></Link
+                      >View<span class="sr-only">
+                        {{ item.campaign_token }}</span
+                      ></Link
                     >
                     <Link
                       :href="route('campaigns.edit', item.id)"

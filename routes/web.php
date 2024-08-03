@@ -32,8 +32,16 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
+    /** Projects **/
+    Route::get('projects/{project}/settings', [ProjectController::class, 'settings'])->name('projects.settings');
     Route::resource('projects', ProjectController::class);
+
+    /** Campaigns **/
+    Route::get('campaigns/{campaign}', [CampaignController::class, 'show'])->name('campaigns.show');
     Route::resource('campaigns', CampaignController::class);
+
+
+    /** Campaign Links **/
     Route::resource('campaign-links', CampaignLinkController::class);
     Route::resource('pages', DataController::class)->only([
         'index',
@@ -45,15 +53,23 @@ Route::middleware([
         'destroy',
     ]);
 
+    /** Technical **/
     Route::resource('technical', TechnicalController::class);
+
+    /** Content **/
     Route::resource('content', ContentController::class);
+
+    /** Ranking **/
     Route::resource('ranking', RankingController::class);
+
+    /** Keywords **/
     Route::resource('keywords', KeywordController::class);
 
+    /** Growth **/
     Route::get('/growth/insights', [GrowthController::class, 'insights']);
     Route::resource('growth', GrowthController::class);
 });
 
-
+/** API  **/
 Route::get('/api/oppdater/locations', [DataForSEOController::class, 'getLocations']);
 Route::get('/api/oppdater/language', [DataForSEOController::class, 'getLanguages']);

@@ -67,8 +67,15 @@
                     class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"
                   >
                     <Link
-                      :href="route('projects.edit', item.project_code)"
+                      :href="route('projects.settings', item.project_code)"
                       class="text-indigo-600 hover:text-indigo-900"
+                      >View<span class="sr-only">
+                        {{ item.project_code }}</span
+                      ></Link
+                    >
+                    <Link
+                      :href="route('projects.edit', item.project_code)"
+                      class="ml-4 text-indigo-600 hover:text-indigo-900"
                       >Edit<span class="sr-only">
                         {{ item.project_name }}</span
                       ></Link

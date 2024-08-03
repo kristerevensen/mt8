@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('target')->nullable(); // Target URL
             $table->text('tagged_url')->nullable(); // Tagged URL with UTM parameters
             $table->unsignedBigInteger('campaign_id'); // Foreign key to campaigns table
+            //$table->string('campaign_token')->nullable();
             $table->text('custom_parameters')->nullable(); // Custom parameters for tracking
             $table->text('description')->nullable(); // Description of the link
 

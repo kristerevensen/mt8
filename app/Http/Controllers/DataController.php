@@ -135,12 +135,10 @@ class DataController extends Controller
         $pageviews = response()->json($finalPageviews);
 
 
-        // Return a view or JSON response
         return Inertia::render('Datapages/Index', [
-            'pages' => $dataPages,
-            //'pages' => $pages,
+            'pages' => $pages,
             'metrics' => $metrics,
-            'pageviews' => $pageviews
+            'pageviews' => $finalPageviews->values() // Ensure this is structured correctly
         ]);
     }
 

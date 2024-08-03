@@ -105,10 +105,20 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($project_code)
+    public function settings($project_code)
     {
-        $project = Project::where('project_code', $project_code)->firstOrFail();
-        return Inertia::render('Projects/Show', ['project' => $project]);
+        //$project = Project::where('project_code', $project_code)->firstOrFail();
+        //return Inertia::render('Projects/Show', ['project' => $project]);
+
+        $project = Project::where('project_code', $project_code)
+            ->where('owner_id', Auth::user()->id)
+            ->firstOrFail();
+
+        //dd($project);
+        return Inertia::render('Projects/Show', [
+            'project' => $project,
+            'project_code' => $project_code
+        ]);
     }
 
     public function edit($project_code)

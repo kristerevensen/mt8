@@ -97,10 +97,10 @@ class CampaignController extends Controller
     /**
      * Display the specified campaign.
      */
-    public function show($id)
+    public function show($campaign_token)
     {
         // Fetch the campaign by ID and ensure it belongs to the authenticated user
-        $campaign = Campaign::where('id', $id)->where('created_by', Auth::id())->firstOrFail();
+        $campaign = Campaign::where('campaign_token', $campaign_token)->where('created_by', Auth::id())->firstOrFail();
 
         // Fetch links associated with the campaign
         $links = CampaignLink::where('campaign_id', $campaign->id)
@@ -112,6 +112,8 @@ class CampaignController extends Controller
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get();
+
+        //dd($clicks);
 
         // Return data to the Inertia page
         return Inertia::render('Campaigns/Show', [
