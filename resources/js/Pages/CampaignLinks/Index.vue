@@ -2,15 +2,11 @@
 import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { defineProps } from "vue";
-
-const props = defineProps({
-  dataPages: Array,
-});
 </script>
 
 <template>
-  <Head title="Edit Campaign Link" />
-  <AppLayout title="Edit Campaign Link">
+  <Head title="Campaign Link" />
+  <AppLayout title="Campaign Link">
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
         Campaign links

@@ -13,15 +13,23 @@ class CampaignLinkController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($campaignToken)
+    public function index()
     {
+
         // Get the current user's team and associated projects
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
+        // Get project codes associated with the current team
+        $projectCodes = Campaign::whereHas('project', function ($query) use ($currentTeamId) {
+            $query->where('team_id', $currentTeamId);
+        })->pluck('project_code');
+
+        // Get campaign tokens associated with the project codes
+        $campaignToken = Campaign::whereIn('project_code', $projectCodes)->pluck('id');
 
         // Fetch links related to those campaigns
-        $links = CampaignLink::whereIn('campaign_token', $campaignToken)->get();
+        $links = CampaignLink::whereIn('id', $campaignToken)->get();
 
         return Inertia::render('CampaignLinks/Index', [
             'links' => $links,
