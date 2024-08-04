@@ -4,6 +4,7 @@ import Pagination from "@/Components/Paginator.vue";
 import { reactive, onMounted, ref, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import NavLink from "@/Components/NavLink.vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 
 // Import vue-chartjs components
 import { Line } from "vue-chartjs";
@@ -103,7 +104,7 @@ const chartData = computed(() => {
         data, // Pageview counts for y-axis
         borderColor: "#4f46e5", // Indigo
         backgroundColor: "rgba(79, 70, 229, 0.1)",
-        fill: true,
+        height: "100px",
         tension: 0.1,
       },
     ],
@@ -164,49 +165,44 @@ function formatDateChart(dateString) {
   return formattedDate;
 }
 
-const tabs = [
-  { name: "All Pages", href: "/pages", current: true },
-  { name: "Technical", href: "/technical", current: false },
-  { name: "Content", href: "/content", current: false },
-  { name: "Ranking", href: "/ranking", current: false },
-];
+// Define breadcrumb data for this page
+const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
 </script>
 
 <template>
   <Head title="Pages" />
   <AppLayout title="Pages">
-    <div class="mt-5">
-      <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div class="relative pb-5 border-b border-gray-200 sm:pb-0">
-          <div class="sm:flex-auto md:flex md:items-center md:justify-between">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">
-              Pages
-            </h1>
-            <div
-              class="flex mt-3 space-x-2 md:absolute md:right-0 md:top-5 md:mt-0"
+    <template #header>
+      <div class="flex justify-between">
+        <div>
+          <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            <Breadcrumbs :pages="breadcrumbs" />
+          </h2>
+        </div>
+        <div>
+          <div class="flex items-center space-x-4">
+            <input
+              type="date"
+              v-model="dateSelector.fromDate"
+              class="border-gray-300 rounded-md"
+            />
+            <input
+              type="date"
+              v-model="dateSelector.toDate"
+              class="border-gray-300 rounded-md"
+            />
+            <button
+              @click="submitDateRange"
+              class="px-4 py-2 text-white bg-blue-500 rounded-md"
             >
-              <input
-                type="date"
-                v-model="dateSelector.fromDate"
-                class="border-gray-300 rounded-md"
-              />
-              <input
-                type="date"
-                v-model="dateSelector.toDate"
-                class="border-gray-300 rounded-md"
-              />
-              <button
-                @click="submitDateRange"
-                class="px-4 py-2 text-white bg-blue-500 rounded-md"
-              >
-                Data Period
-              </button>
-            </div>
+              Data Period
+            </button>
           </div>
         </div>
-        <div class="mb-5">
-          <div class="mt-5 mb-4"></div>
-        </div>
+      </div>
+    </template>
+    <div class="mt-5">
+      <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="">
           <div>
             <dl class="grid grid-cols-1 gap-5 mt-5 sm:grid-cols-5">
@@ -276,7 +272,11 @@ const tabs = [
 
         <div class="mt-10 bg-white rounded-lg shadow sm:p-6">
           <!-- Replace Google Chart with vue-chartjs -->
-          <Line :data="chartData" :options="chartOptions" />
+          <Line
+            :data="chartData"
+            :options="chartOptions"
+            class="chart-container"
+          />
         </div>
 
         <div
@@ -326,7 +326,7 @@ const tabs = [
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >
                   <Link
-                    :href="`/page/view/${page.url_code}`"
+                    :href="route('pages.show', { page: page.url_code })"
                     class="hover:underline"
                     >{{ truncateUrl(page.url) }}</Link
                   >
@@ -364,3 +364,8 @@ const tabs = [
     </div>
   </AppLayout>
 </template>
+<style scoped>
+.chart-container {
+  height: 100px; /* Set your desired height here */
+}
+</style>

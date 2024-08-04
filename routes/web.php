@@ -39,6 +39,7 @@ Route::middleware([
     /** Campaigns **/
     Route::get('campaigns/{campaign}', [CampaignController::class, 'show'])->name('campaigns.show');
     Route::resource('campaigns', CampaignController::class);
+    Route::get('campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
 
 
     /** Campaign Links **/
