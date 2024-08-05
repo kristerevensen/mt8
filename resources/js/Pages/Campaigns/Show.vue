@@ -14,6 +14,7 @@ import {
   PointElement,
 } from "chart.js";
 import Pagination from "@/Components/Pagination.vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 
 ChartJS.register(
   Title,
@@ -66,6 +67,11 @@ const clickOptions = {
     },
   },
 };
+
+const breadcrumbs = [
+  { name: "All Campaigns", href: "/campaigns", current: false },
+  { name: props.campaign.campaign_name, current: true },
+];
 </script>
 
 <template>
@@ -73,8 +79,8 @@ const clickOptions = {
   <AppLayout title="Campaign Details">
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="mb-5 text-xl font-semibold leading-tight text-gray-800">
-          {{ campaign.campaign_name }}
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+          <Breadcrumbs :pages="breadcrumbs" />
         </h2>
         <Link
           :href="`/campaign-links/create?campaign_token=${campaign.campaign_token}`"

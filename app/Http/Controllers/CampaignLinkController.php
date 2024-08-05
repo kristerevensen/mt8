@@ -41,23 +41,32 @@ class CampaignLinkController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create($campaignId = null)
+    public function create(Request $request)
     {
         $user = Auth::user();
 
-        if (is_null($campaignId)) {
-            // Get campaigns related to the current team
-            $currentTeamId = $user->current_team_id;
+        // Get the current team ID
+        $currentTeamId = $user->current_team_id;
 
-            $campaigns = Campaign::whereHas('project', function ($query) use ($currentTeamId) {
-                $query->where('team_id', $currentTeamId);
-            })->get();
-            //dd($campaigns);
-        }
+        //dd($request->query('campaign_token'));
+        // Retrieve the campaign token from the request query
+        $campaignToken = $request->query('campaign_token');  // Use the query method to retrieve the parameter
 
+        //get campaign ID from campaign token
+        $campaign = Campaign::where('campaign_token', $campaignToken)->first();
+        $campaignId = $campaign->id;
+
+        // Get campaigns related to the current team using the token
+        $campaigns = Campaign::whereHas('project', function ($query) use ($currentTeamId, $campaignToken) {
+            $query->where('team_id', $currentTeamId)
+                ->where('campaign_token', $campaignToken);
+        })->get();
 
         return Inertia::render('CampaignLinks/Create', [
             'campaigns' => $campaigns,
+            'campaign_token' => $campaignToken,
+            'campaign_id' => $campaignId,
+
         ]);
     }
 
@@ -66,9 +75,10 @@ class CampaignLinkController extends Controller
      */
     public function store(Request $request)
     {
+        //dd($request->all());
         $request->validate([
             'landing_page' => 'required|url', // Renamed to match the database field
-            'campaign_id' => 'required|exists:campaigns,id',
+            'campaign_id' => 'required',
             'source' => 'nullable|string',
             'medium' => 'nullable|string',
             'term' => 'nullable|string',
@@ -135,6 +145,13 @@ class CampaignLinkController extends Controller
     {
         $link = CampaignLink::where('link_token', $linktoken)->firstOrFail();
 
+        // Fetch the campaign details using campaign_id from the link
+        $campaign = Campaign::where('id', $link->campaign_id)->firstOrFail();
+
+        // Extract the campaign_name and campaign_token
+        $campaignName = $campaign->campaign_name;
+        $campaignToken = $campaign->campaign_token;
+
         // Get campaigns related to the current team
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
@@ -146,6 +163,8 @@ class CampaignLinkController extends Controller
         return Inertia::render('CampaignLinks/Edit', [
             'link' => $link,
             'campaigns' => $campaigns,
+            'campaign_token' => $campaignToken,
+            'campaign_name' => $campaignName,
         ]);
     }
 
@@ -187,8 +206,9 @@ class CampaignLinkController extends Controller
     public function destroy($id)
     {
         $link = CampaignLink::where('id', $id)->firstOrFail();
+        $campaignToken = $this->getCampaignCode($link->campaign_id);
         $link->delete();
 
-        return redirect()->route('campaign-links.index')->with('success', 'Link deleted successfully.');
+        return redirect()->route('campaigns.show', ['campaign' => $campaignToken])->with('success', 'Link created successfully.');
     }
 }

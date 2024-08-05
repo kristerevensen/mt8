@@ -3,11 +3,24 @@ import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { defineProps } from "vue";
 import EditCampaignLinkForm from "@/Pages/CampaignLinks/components/EditCampaignLinkForm.vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 
 const props = defineProps({
   link: Object,
   campaigns: Array,
+  campaign_token: String,
+  campaign_name: String,
 });
+
+const breadcrumbs = [
+  { name: "All Campaigns", href: "/campaigns", current: false },
+  {
+    name: props.campaign_name,
+    href: "/campaigns/" + props.campaign_token,
+    current: false,
+  },
+  { name: "Edit Campaign Link", current: true },
+];
 </script>
 
 <template>
@@ -15,7 +28,7 @@ const props = defineProps({
   <AppLayout title="Edit Campaign Link">
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
-        Edit Campaign Link
+        <Breadcrumbs :pages="breadcrumbs" />
       </h2>
     </template>
     <div>

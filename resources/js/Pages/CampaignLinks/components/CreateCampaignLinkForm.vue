@@ -8,8 +8,12 @@ import TextInput from "@/Components/TextInput.vue";
 
 // Define the props to receive campaigns from the parent component
 const props = defineProps({
-  campaigns: Array, // List of campaigns to choose from
+  campaigns: Array,
+  campaign_token: String,
+  campaign_id: Number,
 });
+
+console.log(props.campaign_id);
 
 // Set up the form using Inertia's useForm hook
 const form = useForm({
@@ -20,7 +24,8 @@ const form = useForm({
   content: "", // Content for UTM tracking
   custom_parameters: "", // Custom parameters for tracking
   description: "", // Description of the link
-  campaign_id: props.link.campaign_id || "", // Campaign ID
+  campaign_token: props.campaigns.campaign_token || "", // Campaign ID
+  campaign_id: props.campaign_id, // Campaign ID
 });
 
 // Method to submit the form data
