@@ -48,9 +48,6 @@ class CampaignController extends Controller
         // Get projects associated with the current team
         $projects = Project::where('team_id', $currentTeamId)->pluck('project_code');
 
-        if (!$projects->count()) {
-            return redirect()->route('projects.create')->with('error', 'You need to create a project before you can create a campaign.');
-        }
 
         return Inertia::render('Campaigns/Create', [
             'projects' => $projects,

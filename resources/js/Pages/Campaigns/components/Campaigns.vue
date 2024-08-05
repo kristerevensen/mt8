@@ -1,6 +1,8 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
 import { useForm } from "@inertiajs/vue3";
+import AppLayout from "@/Layouts/AppLayout.vue";
+
 
 // Define the campaigns prop
 defineProps({
