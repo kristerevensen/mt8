@@ -13,8 +13,6 @@ const props = defineProps({
   campaign_id: Number,
 });
 
-console.log(props.campaign_id);
-
 // Set up the form using Inertia's useForm hook
 const form = useForm({
   landing_page: "", // Landing Page URL

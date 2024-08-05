@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Location;
 use App\Models\Language;
+use App\Models\Project;
+use App\Models\SeoTask;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
 
@@ -72,6 +74,66 @@ class DataForSEOController extends Controller
             return response()->json(['message' => 'Languages fetched and stored successfully']);
         } else {
             return response()->json(['error' => 'Failed to fetch languages'], 500);
+        }
+    }
+
+
+
+    public function createSeoTask($projectId)
+    {
+        $project = Project::findOrFail($projectId);
+
+        $baseUrl = config('dataforseo.url');
+        $login = config('dataforseo.login');
+        $password = config('dataforseo.password');
+
+        $credentials = base64_encode("{$login}:{$password}");
+
+        $post_array = [
+            [
+                "location_name" => $project->project_country, // Example, adapt based on your requirements
+                "target" => $project->project_domain,
+                "tag" => $project->project_code,
+                "pingback_url" => url('/api/pingback') // Adjust this URL based on your setup
+            ],
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => "Basic {$credentials}",
+            'Content-Type' => 'application/json',
+        ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
+
+        if ($response->successful()) {
+            $taskId = $response->json('tasks.0.task_id');
+            SeoTask::create([
+                'project_id' => $projectId,
+                'location_name' => $project->project_country,
+                'target' => $project->project_domain,
+                'tag' => $project->project_code,
+                'pingback_url' => url('/api/pingback'),
+                'status' => 'pending',
+            ]);
+            return response()->json(['message' => 'Task created successfully']);
+        } else {
+            return response()->json(['error' => 'Failed to create task'], 500);
+        }
+    }
+
+    public function handlePingback(Request $request)
+    {
+        $taskId = $request->query('id');
+        $tag = $request->query('tag');
+
+        $task = SeoTask::where('tag', $tag)->first();
+
+        if ($task) {
+            $task->status = 'completed';
+            $task->result = $request->all(); // Assuming full data is sent
+            $task->save();
+
+            return response()->json(['message' => 'Pingback processed']);
+        } else {
+            return response()->json(['error' => 'Task not found'], 404);
         }
     }
 }

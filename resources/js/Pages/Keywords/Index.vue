@@ -2,6 +2,11 @@
 import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { defineProps } from "vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
+
+const breadcrumbs = [
+  { name: "All Keywords", href: "/keywords", current: true },
+];
 </script>
 
 <template>
@@ -9,7 +14,7 @@ import { defineProps } from "vue";
   <AppLayout title="Keywords">
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
-        Keywords
+        <Breadcrumbs :pages="breadcrumbs" />
       </h2>
     </template>
     <div>

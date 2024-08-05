@@ -23,6 +23,44 @@ class Project extends Model
         'team_id',
     ];
 
+    /**
+     * Attributtene som bør konverteres til datotyper.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'project_category' => 'array',
+    ];
+
+    /**
+     * Primærnøkkel for modellen.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'project_code';
+
+    /**
+     * Inkluderer ikke autoincrement.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * Tabellen som modellen bruker.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Relasjon til SEO-oppgaver.
+     */
+    public function seoTasks()
+    {
+        return $this->hasMany(SeoTask::class, 'project_code', 'project_code');
+    }
+
     // Define relationships
     public function owner()
     {
