@@ -94,9 +94,11 @@ class DataForSEOController extends Controller
                 "location_name" => $project->project_country, // Example, adapt based on your requirements
                 "target" => $project->project_domain,
                 "tag" => $project->project_code,
-                "pingback_url" => url('/api/pingback') // Adjust this URL based on your setup
+                "pingback_url" => 'http://www.measuretank.com/api/pingback' // Adjust this URL based on your setup
             ],
         ];
+
+        dd($post_array);
 
         $response = Http::withHeaders([
             'Authorization' => "Basic {$credentials}",

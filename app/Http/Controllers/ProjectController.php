@@ -83,7 +83,6 @@ class ProjectController extends Controller
         ]);
 
 
-
         $project = new Project();
         $project->project_code = $this->generateUniqueCode();
         $project->project_name = $request->project_name;
@@ -96,6 +95,10 @@ class ProjectController extends Controller
 
 
         if ($project->save()) {
+
+            $dataForSeoController = new DataForSEOController();
+            $dataForSeoController->createSeoTask($project->project_code);
+
             return redirect()->route('projects.index')->with('success', 'Project created successfully.');
         } else {
             return redirect()->back()->with('error', 'Failed to create project.');

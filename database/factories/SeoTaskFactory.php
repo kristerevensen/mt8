@@ -14,7 +14,7 @@ class SeoTaskFactory extends Factory
     {
         return [
             'project_code' => 'P00000001', // Assumes you have a Project factory
-            'location_name' => $this->faker->word,
+            'location_name' => 'NO',
             'target' => $this->faker->url,
             'tag' => $this->faker->word,
             'pingback_url' => $this->faker->url,
