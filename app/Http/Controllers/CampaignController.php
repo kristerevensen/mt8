@@ -116,7 +116,9 @@ class CampaignController extends Controller
     public function show($campaign_token)
     {
         // Fetch the campaign by token and ensure it belongs to the authenticated user
-        $campaign = Campaign::where('campaign_token', $campaign_token)->where('created_by', Auth::id())->firstOrFail();
+        $campaign = Campaign::where('campaign_token', $campaign_token)
+            ->where('created_by', Auth::id())
+            ->firstOrFail();
 
         // Fetch links associated with the campaign along with the click counts
         $links = CampaignLink::where('campaign_id', $campaign->id)
@@ -136,6 +138,7 @@ class CampaignController extends Controller
             'clicks' => $clicks,
         ]);
     }
+
 
 
     /**
