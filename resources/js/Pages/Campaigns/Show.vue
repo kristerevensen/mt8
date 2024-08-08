@@ -199,6 +199,12 @@ const deleteLink = (id) => {
                       >
                         Medium
                       </th>
+                      <th
+                        scope="col"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        Clicks
+                      </th>
                       <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span class="sr-only">Actions</span>
                       </th>
@@ -225,6 +231,11 @@ const deleteLink = (id) => {
                         class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
                       >
                         {{ link.medium }}
+                      </td>
+                      <td
+                        class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
+                      >
+                        {{ link.clicks_count }}
                       </td>
                       <td
                         class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"

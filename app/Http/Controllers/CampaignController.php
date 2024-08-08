@@ -115,29 +115,28 @@ class CampaignController extends Controller
      */
     public function show($campaign_token)
     {
-        // Fetch the campaign by ID and ensure it belongs to the authenticated user
+        // Fetch the campaign by token and ensure it belongs to the authenticated user
         $campaign = Campaign::where('campaign_token', $campaign_token)->where('created_by', Auth::id())->firstOrFail();
 
-        // Fetch links associated with the campaign
+        // Fetch links associated with the campaign along with the click counts
         $links = CampaignLink::where('campaign_id', $campaign->id)
-            ->paginate(10); // Paginering av lenkene
+            ->withCount('clicks')
+            ->paginate(10); // Paginate links
 
-        // Fetch link clicks associated with the campaign
+        // Fetch link clicks associated with the campaign for the graph
         $clicks = CampaignLinkClick::whereIn('link_token', $links->pluck('link_token'))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get();
 
-        //dd($clicks);
-
-        // Return data to the Inertia page
         return Inertia::render('Campaigns/Show', [
             'campaign' => $campaign,
             'links' => $links,
             'clicks' => $clicks,
         ]);
     }
+
 
     /**
      * Show the form for editing the specified campaign.
