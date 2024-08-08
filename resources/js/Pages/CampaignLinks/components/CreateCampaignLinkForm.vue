@@ -30,7 +30,6 @@ const form = useForm({
 const submitForm = () => {
   form.post(route("campaign-links.store"), {
     onSuccess: () => form.reset(), // Reset the form on success
-    onError: () => alert("There was an error creating the link"), // Alert on error
   });
 };
 </script>
@@ -91,12 +90,31 @@ const submitForm = () => {
       <!-- Medium for UTM tracking -->
       <div class="col-span-3">
         <InputLabel for="medium" value="Medium" />
-        <TextInput
+        <select
           id="medium"
           v-model="form.medium"
-          type="text"
-          class="block w-full mt-1"
-        />
+          class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"
+        >
+          <option value="" disabled>Select a medium</option>
+          <option value="cpc">cpc</option>
+          <option value="email">email</option>
+          <option value="organic">organic</option>
+          <option value="social">social</option>
+          <option value="referral">referral</option>
+          <option value="display">display</option>
+          <option value="video">video</option>
+          <option value="banner">banner</option>
+          <option value="sms">sms</option>
+          <option value="qr">qr</option>
+          <option value="content">content</option>
+          <option value="audio">audio</option>
+          <option value="app">app</option>
+          <option value="print">print</option>
+          <option value="podcast">podcast</option>
+          <option value="partner">partner</option>
+          <option value="tv">tv</option>
+          <option value="sponsored">sponsored</option>
+        </select>
         <InputError :message="form.errors.medium" class="mt-2" />
       </div>
 

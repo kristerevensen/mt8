@@ -30,4 +30,9 @@ class CampaignLink extends Model
     {
         return $this->belongsTo(Campaign::class);
     }
+
+    public function clicks()
+    {
+        return $this->hasMany(CampaignLinkClick::class, 'link_token', 'link_token');
+    }
 }

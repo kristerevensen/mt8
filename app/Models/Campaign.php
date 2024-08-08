@@ -36,4 +36,14 @@ class Campaign extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function links()
+    {
+        return $this->hasMany(CampaignLink::class);
+    }
+
+    public function clicks()
+    {
+        return $this->hasManyThrough(CampaignLinkClick::class, CampaignLink::class, 'campaign_id', 'link_token', 'id', 'link_token');
+    }
 }

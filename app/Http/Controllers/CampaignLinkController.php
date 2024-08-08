@@ -76,26 +76,29 @@ class CampaignLinkController extends Controller
     public function store(Request $request)
     {
         //dd($request->all());
+
+        /** Validate the request */
         $request->validate([
             'landing_page' => 'required|url', // Renamed to match the database field
             'campaign_id' => 'required',
-            'source' => 'nullable|string',
-            'medium' => 'nullable|string',
+            'source' => ['required', 'regex:/^(?!https?:\/\/)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/'],
+            'medium' => 'required|string',
             'term' => 'nullable|string',
             'content' => 'nullable|string',
             'custom_parameters' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
+
         $link = new CampaignLink();
-        $link->landing_page = $request->landing_page;
+        $link->landing_page = strtolower($request->landing_page);
         $link->link_token = Str::random(8); // Generate a unique link token
         $link->project_code = $this->getProjectCode($request->campaign_id); // Assuming you have a method to get project code
         $link->campaign_id = $request->campaign_id;
-        $link->source = $request->source;
-        $link->medium = $request->medium;
-        $link->term = $request->term;
-        $link->content = $request->content;
+        $link->source = strtolower($request->source);
+        $link->medium = strtolower($request->medium);
+        $link->term = strtolower($request->term);
+        $link->content = strtolower($request->content);
         $link->custom_parameters = $request->custom_parameters;
         $link->description = $request->description;
 

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CampaignController extends Controller
 {
@@ -25,16 +26,34 @@ class CampaignController extends Controller
         // Get projects associated with the current team
         $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
 
-        // Fetch campaigns related to those projects
+        // Fetch campaigns related to those projects with links count and clicks count
         $campaigns = Campaign::whereIn('project_code', $project_code)
-            ->with('project')
+            ->withCount('links')
+            ->with('links.clicks')
             ->where('created_by', Auth::id())
+            ->get();
+
+        // Calculate clicks count for each campaign
+        $campaigns->each(function ($campaign) {
+            $campaign->clicks_count = $campaign->links->sum(function ($link) {
+                return $link->clicks->count();
+            });
+        });
+
+        // Fetch total clicks data for the line graph
+        $clicks = CampaignLinkClick::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
             ->get();
 
         return Inertia::render('Campaigns/Index', [
             'campaigns' => $campaigns,
+            'clicks' => $clicks,
         ]);
     }
+
+
+
 
     /**
      * Show the form for creating a new campaign.
