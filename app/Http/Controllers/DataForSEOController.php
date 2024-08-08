@@ -23,27 +23,52 @@ class DataForSEOController extends Controller
 
         $credentials = base64_encode("{$login}:{$password}");
 
-        // Fetch locations
-        $locationsResponse = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
-            'Authorization' => "Basic {$credentials}",
-            'Content-Type' => 'application/json',
-        ])->get("{$baseUrl}/v3/content_analysis/locations");
+        try {
+            // Step 1: Fetch locations from DataForSEO
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => "Basic {$credentials}",
+                    'Content-Type' => 'application/json',
+                ])
+                ->get("{$baseUrl}/v3/keywords_data/google_ads/locations");
 
-        if ($locationsResponse->successful()) {
-            $locations = $locationsResponse->json('tasks.0.result');
-            foreach ($locations as $location) {
-                Location::updateOrCreate(
-                    ['country_iso_code' => $location['country_iso_code']],
-                    ['location_name' => $location['location_name']]
-                );
+            if (!$response->successful()) {
+                throw new \Exception('Failed to fetch locations');
             }
-            return response()->json(['message' => 'Locations fetched and stored successfully']);
-        } else {
+            dd($response);
+            // Step 2: Prepare data for bulk insertion
+            $locations = $response->json('tasks.0.result');
+
+            $data = [];
+
+            foreach ($locations as $location) {
+                $data[] = [
+                    'location_code' => $location['location_code'],
+                    'location_name' => $location['location_name'],
+                    'location_code_parent' => $location['location_code_parent'] ?? null,
+                    'country_iso_code' => $location['country_iso_code'],
+                    'location_type' => $location['location_type'],
+                ];
+            }
+
+            // Step 3: Clear the existing data in the table
+            Location::truncate();
+
+            // Step 4: Bulk insert the new data
+            // Use chunks to manage memory usage
+            foreach (array_chunk($data, 500) as $chunk) { // Adjust chunk size as needed
+                Location::insert($chunk);
+            }
+
+            return response()->json(['message' => 'Locations fetched, old records cleared, and new records stored successfully']);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error fetching locations: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch locations'], 500);
         }
     }
+
+
     /**
      * Fetch languages from DataForSEO and store them in the database.
      */
@@ -98,23 +123,27 @@ class DataForSEOController extends Controller
             ],
         ];
 
-        dd($post_array);
+        //dd($post_array);
 
-        $response = Http::withHeaders([
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
             'Authorization' => "Basic {$credentials}",
             'Content-Type' => 'application/json',
         ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
-
+        dd($response->json());
         if ($response->successful()) {
             $taskId = $response->json('tasks.0.task_id');
             SeoTask::create([
                 'project_id' => $projectId,
+                'task_id' => $taskId,
                 'location_name' => $project->project_country,
                 'target' => $project->project_domain,
-                'tag' => $project->project_code,
-                'pingback_url' => url('/api/pingback'),
+                'project_code' => $project->project_code,
+                "pingback_url" => 'http://www.measuretank.com/api/pingback',
                 'status' => 'pending',
             ]);
+
             return response()->json(['message' => 'Task created successfully']);
         } else {
             return response()->json(['error' => 'Failed to create task'], 500);

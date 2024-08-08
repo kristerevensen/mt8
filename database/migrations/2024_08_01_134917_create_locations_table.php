@@ -11,7 +11,10 @@ return new class extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->string('location_name');
-            $table->string('country_iso_code', 2)->unique();
+            $table->integer('location_code');
+            $table->integer('location_code_parent')->nullable();
+            $table->string('country_iso_code')->unique();
+            $table->string('location_type');
             $table->timestamps();
         });
     }

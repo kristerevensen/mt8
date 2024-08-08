@@ -13,6 +13,7 @@ class CreateSeoTasksTable extends Migration
             $table->string('project_code'); // Bruker project_code som utenlandsk nøkkel
             $table->foreign('project_code')->references('project_code')->on('projects')->onDelete('cascade');
             $table->string('location_name');
+            $table->string('task_id')->nullable();
             $table->string('target');
             $table->string('tag')->nullable();
             $table->string('pingback_url')->nullable();
