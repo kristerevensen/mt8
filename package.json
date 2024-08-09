@@ -19,7 +19,10 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
+        "@headlessui/vue": "^1.7.22",
         "@heroicons/vue": "^2.1.5",
+        "@vue-hero-icons/outline": "^1.7.2",
+        "@vue-hero-icons/solid": "^1.7.2",
         "chart.js": "^4.4.3",
         "vue-chartjs": "^5.3.1"
     }

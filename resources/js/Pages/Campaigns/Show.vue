@@ -16,6 +16,9 @@ import {
 } from "chart.js";
 import Pagination from "@/Components/Pagination.vue";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
+import { useForm } from "@inertiajs/vue3";
+
+const form = useForm({});
 
 ChartJS.register(
   Title,
@@ -118,9 +121,12 @@ const breadcrumbs = [
 // Function to handle link deletion
 const deleteLink = (id) => {
   if (confirm("Are you sure you want to delete this link?")) {
-    this.$inertia.delete(`/campaign-links/${id}`, {
+    form.delete(route("campaign-links.destroy", id), {
       onSuccess: () => {
         alert("Link deleted successfully.");
+      },
+      onError: (error) => {
+        console.error("Error deleting link:", error);
       },
     });
   }
@@ -167,8 +173,12 @@ const deleteLink = (id) => {
         </div>
         <div class="flow-root mt-8">
           <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div
+              class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
+            >
+              <div
+                class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg"
+              >
                 <table class="min-w-full divide-y divide-gray-300">
                   <thead class="bg-gray-50">
                     <tr>
@@ -262,19 +272,3 @@ const deleteLink = (id) => {
     </div>
   </AppLayout>
 </template>
-
-<script>
-export default {
-  methods: {
-    deleteLink(id) {
-      if (confirm("Are you sure you want to delete this link?")) {
-        this.$inertia.delete(`/campaign-links/${id}`, {
-          onSuccess: () => {
-            alert("Link deleted successfully.");
-          },
-        });
-      }
-    },
-  },
-};
-</script>
