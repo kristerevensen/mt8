@@ -353,13 +353,13 @@ const fetchFilteredData = () => {
                       >
                         <Link
                           :href="`/campaign-links/${link.link_token}/copy`"
-                          class="text-indigo-600 hover:text-indigo-900"
+                          class="ml-2 text-indigo-600 hover:text-indigo-900"
                         >
                           Copy
                         </Link>
                         <Link
                           :href="`/campaign-links/${link.link_token}/edit`"
-                          class="text-indigo-600 hover:text-indigo-900"
+                          class="ml-2 text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
                         </Link>
