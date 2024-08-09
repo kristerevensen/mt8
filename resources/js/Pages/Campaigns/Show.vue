@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { defineProps, ref, computed } from "vue";
+import { defineProps, ref, computed, onMounted } from "vue";
 import { Line, Bar } from "vue-chartjs";
 import {
   Chart as ChartJS,
@@ -38,27 +38,80 @@ const props = defineProps({
 });
 
 const searchQuery = ref("");
-const filteredLinks = computed(() => {
-  return props.links.data.filter((link) => {
-    return link.landing_page
-      .toLowerCase()
-      .includes(searchQuery.value.toLowerCase());
-  });
+const startDate = ref(""); // Start date
+const endDate = ref(""); // End date
+
+// Function to generate an array of dates between start and end date
+const generateDateRange = (start, end) => {
+  const dateArray = [];
+  let currentDate = new Date(start);
+
+  while (currentDate <= new Date(end)) {
+    dateArray.push(currentDate.toISOString().split("T")[0]);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dateArray;
+};
+
+// Calculate the last whole 28 days for default dates
+const calculateDefaultDates = () => {
+  const today = new Date();
+  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // End date is today
+  const start = new Date(end);
+  start.setDate(start.getDate() - 28); // Start date is 28 days ago
+
+  // Format dates as YYYY-MM-DD
+  const formatDate = (date) => date.toISOString().split("T")[0];
+
+  startDate.value = formatDate(start);
+  endDate.value = formatDate(end);
+};
+
+// Set default dates only on component mount
+onMounted(() => {
+  if (!startDate.value || !endDate.value) {
+    calculateDefaultDates();
+  }
 });
 
-const clickData = {
-  labels: props.clicks.map((click) => click.date),
-  datasets: [
-    {
-      label: "Link Clicks",
-      data: props.clicks.map((click) => click.count),
-      borderColor: "#4f46e5", // Indigo
-      backgroundColor: "rgba(79, 70, 229, 0.1)",
-      fill: true,
-      tension: 0.1,
-    },
-  ],
-};
+const filteredLinks = computed(() => {
+  if (props.links && props.links.data) {
+    return props.links.data.filter((link) => {
+      return link.landing_page
+        .toLowerCase()
+        .includes(searchQuery.value.toLowerCase());
+    });
+  }
+  return [];
+});
+
+const clickData = computed(() => {
+  const dateRange = generateDateRange(startDate.value, endDate.value);
+  const clicksByDate = {};
+
+  // Populate clicksByDate with actual data
+  props.clicks.forEach((click) => {
+    clicksByDate[click.date] = click.count;
+  });
+
+  // Populate data array, filling in 0 for missing dates
+  const data = dateRange.map((date) => clicksByDate[date] || 0);
+
+  return {
+    labels: dateRange,
+    datasets: [
+      {
+        label: "Link Clicks",
+        data: data,
+        borderColor: "#4f46e5", // Indigo
+        backgroundColor: "rgba(79, 70, 229, 0.1)",
+        fill: true,
+        tension: 0.1,
+      },
+    ],
+  };
+});
 
 const clickOptions = {
   responsive: true,
@@ -131,25 +184,63 @@ const deleteLink = (id) => {
     });
   }
 };
+
+// Function to fetch filtered data based on selected dates
+const fetchFilteredData = () => {
+  form.get(route("campaigns.show", props.campaign.campaign_token), {
+    params: {
+      start: startDate.value,
+      end: endDate.value,
+    },
+    onSuccess: () => {
+      alert("Data updated successfully.");
+    },
+    onError: (error) => {
+      console.error("Error fetching data:", error);
+    },
+  });
+};
 </script>
+
+
+
 
 <template>
   <Head title="Campaign Details" />
   <AppLayout title="Campaign Details">
     <template #header>
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-          <Breadcrumbs :pages="breadcrumbs" />
-        </h2>
-        <Link
-          :href="`/campaign-links/create?campaign_token=${campaign.campaign_token}`"
-          class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
-        >
-          Add Campaign Link
-        </Link>
+      <div class="flex justify-between">
+        <div>
+          <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            <Breadcrumbs :pages="breadcrumbs" />
+          </h2>
+        </div>
+        <div>
+          <!-- Date Selectors -->
+          <div class="flex justify-end space-x-4">
+            <input
+              type="date"
+              v-model="startDate"
+              class="border-gray-300 rounded-md"
+              placeholder="Start Date"
+            />
+            <input
+              type="date"
+              v-model="endDate"
+              class="border-gray-300 rounded-md"
+              placeholder="End Date"
+            />
+            <button
+              @click="fetchFilteredData"
+              class="px-4 py-2 text-white bg-blue-500 rounded-md"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
       </div>
     </template>
-    <div>
+    <div class="">
       <div class="py-5 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row lg:space-x-4">
           <!-- Link Clicks Graph -->
@@ -163,14 +254,27 @@ const deleteLink = (id) => {
         </div>
 
         <!-- Search and Table for Links -->
-        <div class="mb-4">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search Links"
-            class="w-full p-2 border rounded"
-          />
+        <div class="flex justify-between">
+          <div>
+            <div class="">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search Links"
+                class="w-full p-2 border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+          <div>
+            <Link
+              :href="`/campaign-links/create?campaign_token=${campaign.campaign_token}`"
+              class="px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
+            >
+              + Link
+            </Link>
+          </div>
         </div>
+
         <div class="flow-root mt-8">
           <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div
@@ -248,6 +352,12 @@ const deleteLink = (id) => {
                         class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"
                       >
                         <Link
+                          :href="`/campaign-links/${link.link_token}/copy`"
+                          class="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Copy
+                        </Link>
+                        <Link
                           :href="`/campaign-links/${link.link_token}/edit`"
                           class="text-indigo-600 hover:text-indigo-900"
                         >
@@ -272,3 +382,4 @@ const deleteLink = (id) => {
     </div>
   </AppLayout>
 </template>
+

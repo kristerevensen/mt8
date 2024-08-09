@@ -142,6 +142,36 @@ class CampaignLinkController extends Controller
     }
 
     /**
+     * Show the form for copying the specified resource.
+     */
+    public function copy($linktoken)
+    {
+        $link = CampaignLink::where('link_token', $linktoken)->firstOrFail();
+
+        // Fetch the campaign details using campaign_id from the link
+        $campaign = Campaign::where('id', $link->campaign_id)->firstOrFail();
+
+        // Extract the campaign_name and campaign_token
+        $campaignName = $campaign->campaign_name;
+        $campaignToken = $campaign->campaign_token;
+
+        // Get campaigns related to the current team
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+
+        $campaigns = Campaign::whereHas('project', function ($query) use ($currentTeamId) {
+            $query->where('team_id', $currentTeamId);
+        })->get();
+
+        return Inertia::render('CampaignLinks/Copy', [
+            'link' => $link,
+            'campaigns' => $campaigns,
+            'campaign_token' => $campaignToken,
+            'campaign_name' => $campaignName,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($linktoken)

@@ -113,7 +113,7 @@ class CampaignController extends Controller
     /**
      * Display the specified campaign.
      */
-    public function show($campaign_token)
+    public function show($campaign_token, Request $request)
     {
         // Fetch the campaign by token and ensure it belongs to the authenticated user
         $campaign = Campaign::where('campaign_token', $campaign_token)
@@ -125,12 +125,25 @@ class CampaignController extends Controller
             ->withCount('clicks')
             ->paginate(10); // Paginate links
 
+        // Get date range from the request
+        $startDate = $request->input('start');
+        $endDate = $request->input('end');
+
         // Fetch link clicks associated with the campaign for the graph
-        $clicks = CampaignLinkClick::whereIn('link_token', $links->pluck('link_token'))
+        $clicksQuery = CampaignLinkClick::whereIn('link_token', $links->pluck('link_token'))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
+            ->orderBy('date', 'asc');
+
+        // Apply date filters if provided
+        if ($startDate) {
+            $clicksQuery->whereDate('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $clicksQuery->whereDate('created_at', '<=', $endDate);
+        }
+
+        $clicks = $clicksQuery->get();
 
         return Inertia::render('Campaigns/Show', [
             'campaign' => $campaign,
@@ -138,6 +151,7 @@ class CampaignController extends Controller
             'clicks' => $clicks,
         ]);
     }
+
 
 
 

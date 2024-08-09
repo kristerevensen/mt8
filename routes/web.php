@@ -45,6 +45,7 @@ Route::middleware([
     /** Campaign Links **/
     Route::resource('campaign-links', CampaignLinkController::class);
     Route::get('/campaign-links/create', [CampaignLinkController::class, 'create'])->name('campaign-links.create');
+    Route::get('/campaign-links/{link_token}/copy', [CampaignLinkController::class, 'copy'])->name('campaign-links.copy');
 
     Route::resource('pages', DataController::class)->only([
         'index',
