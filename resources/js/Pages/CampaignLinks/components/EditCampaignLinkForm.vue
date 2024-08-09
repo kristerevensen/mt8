@@ -15,23 +15,21 @@ const props = defineProps({
 // Set up the form using Inertia's useForm hook, pre-filling with existing link data
 const form = useForm({
   landing_page: props.link.landing_page || "", // Landing Page URL
-  source: props.link.source || "", // Source for UTM tracking
-  medium: props.link.medium || "", // Medium for UTM tracking
-  term: props.link.term || "", // Term for UTM tracking
-  content: props.link.content || "", // Content for UTM tracking
+  source: props.link.source ? props.link.source.toLowerCase() : "", // Source for UTM tracking
+  medium: props.link.medium ? props.link.medium.toLowerCase() : "", // Medium for UTM tracking
+  term: props.link.term ? props.link.term.toLowerCase() : "", // Term for UTM tracking
+  content: props.link.content ? props.link.content.toLowerCase() : "", // Content for UTM tracking
   custom_parameters: props.link.custom_parameters || "", // Custom parameters for tracking
   description: props.link.description || "", // Description of the link
   campaign_id: props.link.campaign_id || "", // Campaign ID
 });
 
+console.log(form.medium);
+
 // Method to submit the form data for updating
 const submitForm = () => {
   form.put(route("campaign-links.update", props.link.id), {
-    onSuccess: () => {
-      form.reset();
-      alert("Link updated successfully");
-    },
-    onError: () => alert("There was an error updating the link"), // Alert on error
+    onSuccess: () => form.reset(),
   });
 };
 </script>
@@ -92,12 +90,31 @@ const submitForm = () => {
       <!-- Medium for UTM tracking -->
       <div class="col-span-3">
         <InputLabel for="medium" value="Medium" />
-        <TextInput
+        <select
           id="medium"
           v-model="form.medium"
-          type="text"
-          class="block w-full mt-1"
-        />
+          class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"
+        >
+          <option value="" disabled>Select a medium</option>
+          <option value="cpc">cpc</option>
+          <option value="email">email</option>
+          <option value="organic">organic</option>
+          <option value="social">social</option>
+          <option value="referral">referral</option>
+          <option value="display">display</option>
+          <option value="video">video</option>
+          <option value="banner">banner</option>
+          <option value="sms">sms</option>
+          <option value="qr">qr</option>
+          <option value="content">content</option>
+          <option value="audio">audio</option>
+          <option value="app">app</option>
+          <option value="print">print</option>
+          <option value="podcast">podcast</option>
+          <option value="partner">partner</option>
+          <option value="tv">tv</option>
+          <option value="sponsored">sponsored</option>
+        </select>
         <InputError :message="form.errors.medium" class="mt-2" />
       </div>
 
