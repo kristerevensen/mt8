@@ -43,6 +43,9 @@ const props = defineProps({
 const searchQuery = ref("");
 const startDate = ref(""); // Start date
 const endDate = ref(""); // End date
+const visibleCampaigns = ref(
+  new Set(props.campaigns.map((c) => c.campaign_name))
+); // Track visible campaigns
 
 // Function to generate an array of dates between start and end date
 const generateDateRange = (start, end) => {
@@ -130,7 +133,9 @@ const totalClicksOptions = {
 };
 
 const campaignClicksData = computed(() => {
-  const campaigns = filteredCampaigns.value;
+  const campaigns = filteredCampaigns.value.filter((c) =>
+    visibleCampaigns.value.has(c.campaign_name)
+  );
   const campaignNames = campaigns.map((campaign) => campaign.campaign_name);
   const campaignClicks = campaigns.map(
     (campaign) => campaign.clicks_count || 0
@@ -160,6 +165,17 @@ const campaignClicksOptions = {
       display: true,
       text: "Clicks per Campaign",
     },
+  },
+  onClick(event, elements) {
+    if (elements.length > 0) {
+      const index = elements[0].index;
+      const campaignName = campaignClicksData.value.labels[index];
+      if (visibleCampaigns.value.has(campaignName)) {
+        visibleCampaigns.value.delete(campaignName);
+      } else {
+        visibleCampaigns.value.add(campaignName);
+      }
+    }
   },
 };
 
