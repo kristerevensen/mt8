@@ -17,6 +17,7 @@ import {
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 import Campaigns from "@/Pages/Campaigns/components/Campaigns.vue";
 import { useForm } from "@inertiajs/vue3";
+import { usePage } from "@inertiajs/vue3";
 
 const form = useForm({});
 
@@ -40,9 +41,13 @@ const props = defineProps({
   clicks: Array,
 });
 
-const searchQuery = ref("");
-const startDate = ref(""); // Start date
-const endDate = ref(""); // End date
+// Access the URL query parameters (if any)
+const { url } = usePage();
+const urlParams = new URLSearchParams(url.split("?")[1]);
+
+const searchQuery = ref(urlParams.get("search") || ""); // Default to empty string if not in URL
+const startDate = ref(urlParams.get("start") || ""); // Start date from URL or empty string
+const endDate = ref(urlParams.get("end") || ""); // End date from URL or empty string
 const visibleCampaigns = ref(
   new Set(props.campaigns.map((c) => c.campaign_name))
 ); // Track visible campaigns
@@ -62,23 +67,27 @@ const generateDateRange = (start, end) => {
 
 // Calculate the last whole 28 days for default dates
 const calculateDefaultDates = () => {
-  const today = new Date();
-  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // End date is today
-  const start = new Date(end);
-  start.setDate(start.getDate() - 28); // Start date is 28 days ago
+  if (!startDate.value || !endDate.value) {
+    const today = new Date();
+    const end = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ); // End date is today
+    const start = new Date(end);
+    start.setDate(start.getDate() - 28); // Start date is 28 days ago
 
-  // Format dates as YYYY-MM-DD
-  const formatDate = (date) => date.toISOString().split("T")[0];
+    // Format dates as YYYY-MM-DD
+    const formatDate = (date) => date.toISOString().split("T")[0];
 
-  startDate.value = formatDate(start);
-  endDate.value = formatDate(end);
+    startDate.value = formatDate(start);
+    endDate.value = formatDate(end);
+  }
 };
 
-// Set default dates only on component mount
+// Set default dates if they are not set in URL params
 onMounted(() => {
-  if (!startDate.value || !endDate.value) {
-    calculateDefaultDates();
-  }
+  calculateDefaultDates();
 });
 
 const filteredCampaigns = computed(() => {
@@ -186,12 +195,6 @@ const fetchFilteredData = () => {
       start: startDate.value,
       end: endDate.value,
       search: searchQuery.value,
-    },
-    onSuccess: () => {
-      alert("Data updated successfully.");
-    },
-    onError: (error) => {
-      console.error("Error fetching data:", error);
     },
   });
 };
