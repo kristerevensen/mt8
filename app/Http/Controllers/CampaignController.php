@@ -93,7 +93,7 @@ class CampaignController extends Controller
         $campaign->campaign_name = $request->campaign_name;
         $campaign->project_code = $this->getProjectCode($request); // Get project_code from the project associated with the selected team
         $campaign->campaign_token = Str::random(8); // Generate a unique token
-        $campaign->created_by = auth()->id();
+        $campaign->created_by = Auth::id();
         $campaign->start = $request->start;
         $campaign->end = $request->end;
         $campaign->status = $request->status;
