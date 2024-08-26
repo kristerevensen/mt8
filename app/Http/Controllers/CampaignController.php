@@ -19,29 +19,32 @@ class CampaignController extends Controller
      */
     public function index()
     {
-        // Fetch campaigns for the project related to the user's current team
+        // Hent den autentiserte brukeren og det nåværende team ID
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
-        // Get projects associated with the current team
-        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        // Hent prosjektkoder assosiert med det nåværende teamet
+        $project_codes = Project::where('team_id', $currentTeamId)->pluck('project_code');
 
-        // Fetch campaigns related to those projects with links count and clicks count
-        $campaigns = Campaign::whereIn('project_code', $project_code)
+        // Hent kampanjer knyttet til disse prosjektene med antall linker og klikk
+        $campaigns = Campaign::whereIn('project_code', $project_codes)
             ->withCount('links')
             ->with('links.clicks')
             ->where('created_by', Auth::id())
-            ->get();
+            ->paginate(10); // Endret fra get() til paginate(10)
 
-        // Calculate clicks count for each campaign
+        // Beregn antall klikk for hver kampanje
         $campaigns->each(function ($campaign) {
             $campaign->clicks_count = $campaign->links->sum(function ($link) {
                 return $link->clicks->count();
             });
         });
 
-        // Fetch total clicks data for the line graph
-        $clicks = CampaignLinkClick::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        // Hent total klikkdata for linjediagrammet, filtrert etter prosjektkoder
+        $clicks = CampaignLinkClick::whereHas('campaignLink', function ($query) use ($project_codes) {
+            $query->whereIn('project_code', $project_codes);
+        })
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get();
@@ -129,8 +132,11 @@ class CampaignController extends Controller
         $startDate = $request->input('start');
         $endDate = $request->input('end');
 
-        // Fetch link clicks associated with the campaign for the graph
-        $clicksQuery = CampaignLinkClick::whereIn('link_token', $links->pluck('link_token'))
+        // Hent klikkdata relatert til kampanjen og prosjektet for grafen
+        $clicksQuery = CampaignLinkClick::whereHas('campaignLink', function ($query) use ($campaign) {
+            $query->where('campaign_id', $campaign->id)
+                ->where('project_code', $campaign->project_code);
+        })
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date', 'asc');

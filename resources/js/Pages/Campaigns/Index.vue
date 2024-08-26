@@ -16,6 +16,7 @@ import {
 } from "chart.js";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 import Campaigns from "@/Pages/Campaigns/components/Campaigns.vue";
+import Pagination from "@/Components/Pagination.vue";
 import { useForm } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
 
@@ -37,7 +38,7 @@ const breadcrumbs = [
 ];
 
 const props = defineProps({
-  campaigns: Array,
+  campaigns: Object, // Endret fra Array til Object for å støtte paginering
   clicks: Array,
 });
 
@@ -49,7 +50,7 @@ const searchQuery = ref(urlParams.get("search") || ""); // Default to empty stri
 const startDate = ref(urlParams.get("start") || ""); // Start date from URL or empty string
 const endDate = ref(urlParams.get("end") || ""); // End date from URL or empty string
 const visibleCampaigns = ref(
-  new Set(props.campaigns.map((c) => c.campaign_name))
+  new Set(props.campaigns.data.map((c) => c.campaign_name))
 ); // Track visible campaigns
 
 // Function to generate an array of dates between start and end date
@@ -91,8 +92,8 @@ onMounted(() => {
 });
 
 const filteredCampaigns = computed(() => {
-  if (props.campaigns) {
-    return props.campaigns.filter((campaign) => {
+  if (props.campaigns && props.campaigns.data) {
+    return props.campaigns.data.filter((campaign) => {
       return campaign.campaign_name
         .toLowerCase()
         .includes(searchQuery.value.toLowerCase());
@@ -272,11 +273,13 @@ const fetchFilteredData = () => {
               class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
             >
               <div class="ring-black ring-opacity-5 sm:rounded-lg">
-                <Campaigns :campaigns="filteredCampaigns" />
+                <Campaigns :campaigns="props.campaigns" />
               </div>
             </div>
           </div>
         </div>
+        <!-- Pagination Component -->
+        <Pagination :links="props.campaigns.links" />
       </div>
     </div>
   </AppLayout>

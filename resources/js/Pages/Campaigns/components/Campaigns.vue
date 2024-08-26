@@ -3,7 +3,7 @@ import { Link, useForm } from "@inertiajs/vue3";
 
 // Define the campaigns prop
 defineProps({
-  campaigns: Array,
+  campaigns: Object, // Expecting a paginated object
 });
 
 // Initialize form data for Inertia.js
@@ -72,8 +72,11 @@ const deleteCampaign = (campaign_id) => {
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(campaign, index) in campaigns" :key="index">
+            <tbody
+              v-if="campaigns.data.length > 0"
+              class="bg-white divide-y divide-gray-200"
+            >
+              <tr v-for="(campaign, index) in campaigns.data" :key="index">
                 <td
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >
@@ -132,8 +135,17 @@ const deleteCampaign = (campaign_id) => {
                 </td>
               </tr>
             </tbody>
+            <tbody v-else>
+              <tr>
+                <td colspan="7" class="py-4 text-center text-gray-500">
+                  No campaigns found.
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
+        <!-- Legg til Pagination-komponenten her -->
+        <Pagination :links="campaigns.links" />
       </div>
     </div>
   </div>
