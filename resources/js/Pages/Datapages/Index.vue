@@ -36,6 +36,36 @@ const props = defineProps({
   pageviews: Array, // Array to match the received data structure
 });
 
+// Sorting state
+const sortColumn = ref("pageviews"); // Default sorting by pageviews
+const sortDirection = ref("desc"); // Default to descending order
+
+// Function to toggle sorting
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+  } else {
+    sortColumn.value = column;
+    sortDirection.value = "asc";
+  }
+};
+
+// Computed property to sort pages
+const sortedPages = computed(() => {
+  if (!props.pages || !props.pages.data) return [];
+
+  return [...props.pages.data].sort((a, b) => {
+    const valueA = a[sortColumn.value];
+    const valueB = b[sortColumn.value];
+
+    if (sortDirection.value === "asc") {
+      return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+    } else {
+      return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+    }
+  });
+});
+
 // Add the truncateUrl method here
 function truncateUrl(url) {
   const maxLength = 50;
@@ -169,6 +199,7 @@ function formatDateChart(dateString) {
 const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
 </script>
 
+
 <template>
   <Head title="Pages" />
   <AppLayout title="Pages">
@@ -271,7 +302,6 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
         </div>
 
         <div class="mt-10 bg-white rounded-lg shadow sm:p-6">
-          <!-- Replace Google Chart with vue-chartjs -->
           <Line
             :data="chartData"
             :options="chartOptions"
@@ -286,34 +316,54 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
             <thead class="bg-gray-50">
               <tr>
                 <th
+                  @click="toggleSort('url')"
                   scope="col"
-                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
                 >
                   Page Path
+                  <span v-if="sortColumn === 'url'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('pageviews')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Pageviews
+                  <span v-if="sortColumn === 'pageviews'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('bounce')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Bounce%
+                  <span v-if="sortColumn === 'bounce'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('entrances')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Entrance%
+                  <span v-if="sortColumn === 'entrances'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('exits')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Exit%
+                  <span v-if="sortColumn === 'exits'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                   <span class="sr-only">Edit</span>
@@ -321,7 +371,7 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="page in pages.data" :key="page.id">
+              <tr v-for="page in sortedPages" :key="page.id">
                 <td
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >
@@ -364,8 +414,3 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
     </div>
   </AppLayout>
 </template>
-<style scoped>
-.chart-container {
-  height: 100px; /* Set your desired height here */
-}
-</style>

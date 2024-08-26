@@ -1,14 +1,44 @@
 <script setup>
+import { ref, computed } from "vue";
 import { Link, useForm } from "@inertiajs/vue3";
 
 // Define the campaigns prop
-defineProps({
+const props = defineProps({
   campaigns: Object, // Expecting a paginated object
 });
 
 // Initialize form data for Inertia.js
 const form = useForm({
   campaign_id: "",
+});
+
+// Sorting state
+const sortColumn = ref("campaign_name");
+const sortDirection = ref("asc");
+
+// Function to toggle sorting
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+  } else {
+    sortColumn.value = column;
+    sortDirection.value = "asc";
+  }
+};
+
+// Computed property to sort campaigns
+const sortedCampaigns = computed(() => {
+  if (!props.campaigns || !props.campaigns.data) return [];
+  return [...props.campaigns.data].sort((a, b) => {
+    const valueA = a[sortColumn.value] || "";
+    const valueB = b[sortColumn.value] || "";
+
+    if (sortDirection.value === "asc") {
+      return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+    } else {
+      return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+    }
+  });
 });
 
 // Function to delete a campaign
@@ -21,6 +51,8 @@ const deleteCampaign = (campaign_id) => {
 };
 </script>
 
+
+
 <template>
   <div class="flow-root mt-8">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -32,16 +64,24 @@ const deleteCampaign = (campaign_id) => {
             <thead class="bg-gray-50">
               <tr>
                 <th
+                  @click="toggleSort('campaign_name')"
                   scope="col"
-                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
                 >
                   Campaign
+                  <span v-if="sortColumn === 'campaign_name'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('campaign_token')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Campaign Code
+                  <span v-if="sortColumn === 'campaign_token'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
                   scope="col"
@@ -50,22 +90,34 @@ const deleteCampaign = (campaign_id) => {
                   Groups
                 </th>
                 <th
+                  @click="toggleSort('links_count')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Links
+                  <span v-if="sortColumn === 'links_count'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('clicks_count')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Clicks
+                  <span v-if="sortColumn === 'clicks_count'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th
+                  @click="toggleSort('status')"
                   scope="col"
-                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 >
                   Status
+                  <span v-if="sortColumn === 'status'">
+                    {{ sortDirection === "asc" ? "↑" : "↓" }}
+                  </span>
                 </th>
                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                   <span class="sr-only">Actions</span>
@@ -73,10 +125,10 @@ const deleteCampaign = (campaign_id) => {
               </tr>
             </thead>
             <tbody
-              v-if="campaigns.data.length > 0"
+              v-if="sortedCampaigns.length > 0"
               class="bg-white divide-y divide-gray-200"
             >
-              <tr v-for="(campaign, index) in campaigns.data" :key="index">
+              <tr v-for="(campaign, index) in sortedCampaigns" :key="index">
                 <td
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >
@@ -144,7 +196,7 @@ const deleteCampaign = (campaign_id) => {
             </tbody>
           </table>
         </div>
-        <!-- Legg til Pagination-komponenten her -->
+        <!-- Pagination Component -->
         <Pagination :links="campaigns.links" />
       </div>
     </div>

@@ -41,6 +41,20 @@ const searchQuery = ref("");
 const startDate = ref(""); // Start date
 const endDate = ref(""); // End date
 
+// Sorting state
+const sortColumn = ref("landing_page");
+const sortDirection = ref("asc");
+
+// Function to toggle sorting
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+  } else {
+    sortColumn.value = column;
+    sortDirection.value = "asc";
+  }
+};
+
 // Function to generate an array of dates between start and end date
 const generateDateRange = (start, end) => {
   const dateArray = [];
@@ -76,14 +90,24 @@ onMounted(() => {
 });
 
 const filteredLinks = computed(() => {
-  if (props.links && props.links.data) {
-    return props.links.data.filter((link) => {
-      return link.landing_page
-        .toLowerCase()
-        .includes(searchQuery.value.toLowerCase());
-    });
-  }
-  return [];
+  if (!props.links || !props.links.data) return [];
+
+  const filtered = props.links.data.filter((link) => {
+    return link.landing_page
+      .toLowerCase()
+      .includes(searchQuery.value.toLowerCase());
+  });
+
+  return filtered.sort((a, b) => {
+    const valueA = a[sortColumn.value] || "";
+    const valueB = b[sortColumn.value] || "";
+
+    if (sortDirection.value === "asc") {
+      return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+    } else {
+      return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+    }
+  });
 });
 
 const clickData = computed(() => {
@@ -287,10 +311,14 @@ const fetchFilteredData = () => {
                   <thead class="bg-gray-50">
                     <tr>
                       <th
+                        @click="toggleSort('landing_page')"
                         scope="col"
-                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
                       >
                         Landing Page
+                        <span v-if="sortColumn === 'landing_page'">
+                          {{ sortDirection === "asc" ? "↑" : "↓" }}
+                        </span>
                       </th>
                       <th
                         scope="col"
@@ -299,22 +327,34 @@ const fetchFilteredData = () => {
                         Tagged URL
                       </th>
                       <th
+                        @click="toggleSort('source')"
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                       >
                         Source
+                        <span v-if="sortColumn === 'source'">
+                          {{ sortDirection === "asc" ? "↑" : "↓" }}
+                        </span>
                       </th>
                       <th
+                        @click="toggleSort('medium')"
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                       >
                         Medium
+                        <span v-if="sortColumn === 'medium'">
+                          {{ sortDirection === "asc" ? "↑" : "↓" }}
+                        </span>
                       </th>
                       <th
+                        @click="toggleSort('clicks_count')"
                         scope="col"
-                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                       >
                         Clicks
+                        <span v-if="sortColumn === 'clicks_count'">
+                          {{ sortDirection === "asc" ? "↑" : "↓" }}
+                        </span>
                       </th>
                       <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span class="sr-only">Actions</span>
@@ -382,4 +422,3 @@ const fetchFilteredData = () => {
     </div>
   </AppLayout>
 </template>
-

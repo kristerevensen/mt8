@@ -273,7 +273,7 @@ const fetchFilteredData = () => {
               class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
             >
               <div class="ring-black ring-opacity-5 sm:rounded-lg">
-                <Campaigns :campaigns="props.campaigns" />
+                <Campaigns :campaigns="campaigns" />
               </div>
             </div>
           </div>
