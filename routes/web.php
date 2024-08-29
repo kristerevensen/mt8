@@ -10,7 +10,9 @@ use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\TechnicalController;
+use App\Mail\Invitation;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -77,3 +79,8 @@ Route::middleware([
 /** API  **/
 Route::get('/api/oppdater/locations', [DataForSEOController::class, 'getLocations']);
 Route::get('/api/oppdater/language', [DataForSEOController::class, 'getLanguages']);
+
+Route::get('/invitation', function () {
+    $name = 'Knut';
+    Mail::to('k@mcminn.no')->send(new Invitation($name));
+})->name('invitation');

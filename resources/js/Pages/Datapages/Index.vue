@@ -39,6 +39,7 @@ const props = defineProps({
 // Sorting state
 const sortColumn = ref("pageviews"); // Default sorting by pageviews
 const sortDirection = ref("desc"); // Default to descending order
+const searchQuery = ref(""); // Add searchQuery
 
 // Function to toggle sorting
 const toggleSort = (column) => {
@@ -50,11 +51,17 @@ const toggleSort = (column) => {
   }
 };
 
-// Computed property to sort pages
-const sortedPages = computed(() => {
+// Computed property to filter and sort pages
+const filteredPages = computed(() => {
   if (!props.pages || !props.pages.data) return [];
 
-  return [...props.pages.data].sort((a, b) => {
+  // Filter pages based on search query
+  const filtered = props.pages.data.filter((page) =>
+    page.url.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+
+  // Sort the filtered pages
+  return filtered.sort((a, b) => {
     const valueA = a[sortColumn.value];
     const valueB = b[sortColumn.value];
 
@@ -200,6 +207,7 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
 </script>
 
 
+
 <template>
   <Head title="Pages" />
   <AppLayout title="Pages">
@@ -210,28 +218,27 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
             <Breadcrumbs :pages="breadcrumbs" />
           </h2>
         </div>
-        <div>
-          <div class="flex items-center space-x-4">
-            <input
-              type="date"
-              v-model="dateSelector.fromDate"
-              class="border-gray-300 rounded-md"
-            />
-            <input
-              type="date"
-              v-model="dateSelector.toDate"
-              class="border-gray-300 rounded-md"
-            />
-            <button
-              @click="submitDateRange"
-              class="px-4 py-2 text-white bg-blue-500 rounded-md"
-            >
-              Data Period
-            </button>
-          </div>
+        <div class="flex items-center space-x-4">
+          <input
+            type="date"
+            v-model="dateSelector.fromDate"
+            class="border-gray-300 rounded-md"
+          />
+          <input
+            type="date"
+            v-model="dateSelector.toDate"
+            class="border-gray-300 rounded-md"
+          />
+          <button
+            @click="submitDateRange"
+            class="px-4 py-2 text-white bg-blue-500 rounded-md"
+          >
+            Data Period
+          </button>
         </div>
       </div>
     </template>
+
     <div class="mt-5">
       <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="">
@@ -308,9 +315,19 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
             class="chart-container"
           />
         </div>
-
+        <div class="flex justify-between mt-10">
+          <div>
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search Pages"
+              class="border-gray-300 rounded-md"
+            />
+          </div>
+          <div></div>
+        </div>
         <div
-          class="mt-10 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg"
+          class="mt-5 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg"
         >
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
@@ -371,7 +388,7 @@ const breadcrumbs = [{ name: "All Pages", href: "/pages", current: false }];
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="page in sortedPages" :key="page.id">
+              <tr v-for="page in filteredPages" :key="page.id">
                 <td
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >
