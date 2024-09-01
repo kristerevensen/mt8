@@ -90,7 +90,7 @@ class ProjectController extends Controller
         $project->project_language = $request->project_language;
         $project->project_country = $request->project_country;
         $project->project_category = serialize($request->input('project_category')); // Store as serialized string
-        $project->owner_id = auth()->id();
+        $project->owner_id = Auth::user()->id;
         $project->team_id = $request->team_id;
 
 
