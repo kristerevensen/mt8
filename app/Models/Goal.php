@@ -31,4 +31,10 @@ class Goal extends Model
     {
         return $this->belongsTo(Project::class, 'project_code', 'project_code');
     }
+
+    // need to set the goal to have many conversions
+    public function conversions()
+    {
+        return $this->hasMany(Conversion::class, 'goal_uuid', 'goal_uuid');
+    }
 }

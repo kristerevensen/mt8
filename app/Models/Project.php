@@ -77,4 +77,15 @@ class Project extends Model
     {
         return $this->hasMany(Campaign::class, 'project_code', 'project_code');
     }
+
+    public function linkClicks()
+    {
+        return $this->hasMany(LinkClick::class, 'project_code', 'project_code');
+    }
+
+    //sett relasjon til mange goals også
+    public function goals()
+    {
+        return $this->hasMany(Goal::class, 'project_code', 'project_code');
+    }
 }
