@@ -17,9 +17,7 @@ const conversionScript = computed(() => {
     mt.type = 'text/javascript';
     mt.async = true;
     mt.src = 'https://tracking.measuretank.com/conversion.js';
-    mt.setAttribute('data-project-code', '${props.project_code}');
-    mt.setAttribute('data-conversion-type', '${props.goal.goal_type}');
-    mt.setAttribute('data-conversion-value', '${props.goal.goal_value}');
+    mt.setAttribute('data-conversion-uuid', '${props.goal.goal_uuid}');
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(mt, s);
   })();

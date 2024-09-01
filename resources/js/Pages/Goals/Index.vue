@@ -109,6 +109,7 @@ const breadcrumbs = [{ name: "All goals", current: true }];
                         {{ sortDirection === "asc" ? "↑" : "↓" }}
                       </span>
                     </th>
+
                     <th
                       @click="toggleSort('goal_value')"
                       scope="col"
@@ -118,6 +119,12 @@ const breadcrumbs = [{ name: "All goals", current: true }];
                       <span v-if="sortColumn === 'goal_value'">
                         {{ sortDirection === "asc" ? "↑" : "↓" }}
                       </span>
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
+                    >
+                      Goal ID
                     </th>
                     <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span class="sr-only">Actions</span>
@@ -148,6 +155,13 @@ const breadcrumbs = [{ name: "All goals", current: true }];
                           ? goal.goal_value.toFixed(2)
                           : "N/A"
                       }}
+                    </td>
+                    <td>
+                      <span
+                        class="px-3 py-1 text-sm font-semibold text-gray-900 bg-gray-100 rounded-full"
+                      >
+                        {{ goal.goal_uuid }}
+                      </span>
                     </td>
 
                     <td
