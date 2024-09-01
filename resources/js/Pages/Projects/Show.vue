@@ -30,21 +30,20 @@ const trackingScript = computed(() => {
   );
 });
 
-
 const conversionScript = computed(() => {
-    return (
+  return (
     `<!-- MeasureTank Conversion Tracking Snippet -->
 <script>
   (function() {
-    var mtConversion = document.createElement('script');
-    mtConversion.type = 'text/javascript';
-    mtConversion.async = true;
-    mtConversion.src = 'https://tracking.measuretank.com/conversion-tracking.js';
-    mtConversion.setAttribute('data-project-code', '${props.project.project_code}');
-    mtConversion.setAttribute('data-conversion-type', 'purchase');  // Sett inn konverteringstype
-    mtConversion.setAttribute('data-conversion-value', '199.99');   // Sett inn konverteringsverdi
+    var mt = document.createElement('script');
+    mt.type = 'text/javascript';
+    mt.async = true;
+    mt.src = 'https://tracking.measuretank.com/conversion.js'; // Bruker conversion.js som nevnt
+    mt.setAttribute('data-project-code', '${props.project.project_code}');
+    mt.setAttribute('data-conversion-type', 'purchase');  // Sett inn konverteringstype
+    mt.setAttribute('data-conversion-value', '199.99');   // Sett inn konverteringsverdi
     var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(mtConversion, s);
+    s.parentNode.insertBefore(mt, s);
   })();
 </` + `script>`
   );
@@ -197,11 +196,11 @@ const deleteProject = (project_code) => {
             </div>
           </div>
 
-          <div class="space-y-10 divide-y divide-gray-900/10 mt-10">
+          <div class="mt-10 space-y-10 divide-y divide-gray-900/10">
             <div class="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-3">
               <div class="px-4 sm:px-0">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">
-                 Conversion Tracking Information
+                  Conversion Tracking Information
                 </h2>
                 <p class="mt-1 text-sm leading-6 text-gray-600">
                   Make sure the domain given, is the correct one you collect
