@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('project_code')->index();
             $table->string('goal_name');
             $table->string('goal_type');
-            $table->decimal('goal_value', 12, 2)->nullable();
+            $table->integer('goal_value')->nullable();
             $table->text('goal_description')->nullable();
             $table->string('goal_uuid')->unique();
             $table->timestamps();

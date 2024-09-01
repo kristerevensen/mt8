@@ -5,6 +5,7 @@ import { Link, useForm } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 
 import Pagination from "@/Components/Pagination.vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 
 // Define the goals prop
 const props = defineProps({
@@ -51,6 +52,8 @@ const deleteGoal = (goal_id) => {
     });
   }
 };
+
+const breadcrumbs = [{ name: "All goals", current: true }];
 </script>
 
 
@@ -59,13 +62,19 @@ const deleteGoal = (goal_id) => {
   <AppLayout title="Goals">
     <template #header>
       <div class="flex justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Goals</h2>
-        <Link
-          :href="route('goals.create')"
-          class="px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
-        >
-          + New Goal
-        </Link>
+        <div>
+          <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            <Breadcrumbs :pages="breadcrumbs" />
+          </h2>
+        </div>
+        <div>
+          <Link
+            :href="route('goals.create')"
+            class="px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
+          >
+            + New Goal
+          </Link>
+        </div>
       </div>
     </template>
     <div class="py-5 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -110,12 +119,6 @@ const deleteGoal = (goal_id) => {
                         {{ sortDirection === "asc" ? "↑" : "↓" }}
                       </span>
                     </th>
-                    <th
-                      scope="col"
-                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Description
-                    </th>
                     <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span class="sr-only">Actions</span>
                     </th>
@@ -139,16 +142,23 @@ const deleteGoal = (goal_id) => {
                     <td
                       class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
                     >
-                      {{ goal.goal_value ? goal.goal_value.toFixed(2) : "N/A" }}
+                      {{
+                        typeof goal.goal_value === "number" &&
+                        goal.goal_value !== null
+                          ? goal.goal_value.toFixed(2)
+                          : "N/A"
+                      }}
                     </td>
-                    <td
-                      class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
-                    >
-                      {{ goal.goal_description }}
-                    </td>
+
                     <td
                       class="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"
                     >
+                      <Link
+                        :href="route('goals.show', goal.id)"
+                        class="ml-2 text-indigo-600 hover:text-indigo-900"
+                      >
+                        View
+                      </Link>
                       <Link
                         :href="route('goals.edit', goal.id)"
                         class="ml-2 text-indigo-600 hover:text-indigo-900"

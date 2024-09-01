@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Goal;
 use App\Models\Project;
-use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class GoalsController extends Controller
 {
@@ -21,10 +22,12 @@ class GoalsController extends Controller
         $currentTeamId = $user->current_team_id;
 
         // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        $projectCode = Project::where('team_id', $currentTeamId)->first();
+        $project_code = $projectCode->project_code;
 
         // Fetch goals with pagination based on project_code
-        $goals = Goal::whereIn('project_code', $project_code)->paginate(10);
+        $goals = Goal::where('project_code', $project_code)->paginate(10);
+
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
@@ -32,17 +35,24 @@ class GoalsController extends Controller
     }
 
     /**
+     * Display the specified goal with conversion snippet
+     */
+    public function show(Goal $goal)
+    {
+        $project_code = $goal->project_code;
+
+        return Inertia::render('Goals/Show', [
+            'goal' => $goal,
+            'project_code' => $project_code,
+        ]);
+    }
+
+
+    /**
      * Show the form for creating a new goal.
      */
     public function create()
     {
-        // Hent den autentiserte brukeren og det nåværende team ID
-        $user = Auth::user();
-        $currentTeamId = $user->current_team_id;
-
-        // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
-
         return Inertia::render('Goals/Create', []);
     }
 
@@ -62,21 +72,20 @@ class GoalsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'project_code' => 'required|string|max:255',
             'goal_name' => 'required|string|max:255',
             'goal_type' => 'required|string|max:255',
             'goal_value' => 'nullable|numeric',
             'goal_description' => 'nullable|string',
         ]);
 
-        // Hent den autentiserte brukeren og det nåværende team ID
+
+        // Get the current user's team and associated projects
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
-        // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
-
-
+        // Get project codes associated with the current team
+        $projectCode = Project::where('team_id', $currentTeamId)->first();
+        $project_code = $projectCode->project_code;
 
         //create goal
         $goals = new Goal();
@@ -85,11 +94,13 @@ class GoalsController extends Controller
         $goals->goal_type = $request->goal_type;
         $goals->goal_value = $request->goal_value;
         $goals->goal_description = $request->goal_description;
-        $goals->save();
+        $goals->goal_uuid = (string) Str::uuid();
 
-        Goal::create($validated);
-
-        return redirect()->route('goals.index')->with('success', 'Goal created successfully.');
+        if ($goals->save()) {
+            return redirect()->route('goals.index')->with('success', 'Goal created successfully.');
+        } else {
+            return redirect()->route('goals.index')->with('error', 'Goal not created.');
+        }
     }
 
     /**
@@ -98,7 +109,6 @@ class GoalsController extends Controller
     public function update(Request $request, Goal $goal)
     {
         $validated = $request->validate([
-            'project_code' => 'required|string|max:255',
             'goal_name' => 'required|string|max:255',
             'goal_type' => 'required|string|max:255',
             'goal_value' => 'nullable|numeric',

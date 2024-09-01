@@ -1,5 +1,7 @@
 
 <script setup>
+import { Head, Link } from "@inertiajs/vue3";
+
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import FormSection from "@/Components/FormSection.vue";
@@ -7,21 +9,25 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import Breadcrumbs from "@/Components/Breadcrumbs.vue";
+
 import { defineProps } from "vue";
 
-const props = defineProps({
-  projects: Array,
-});
+const props = defineProps({});
 
-const breadcrumbs = [{ name: "All goals", href: "/goals", current: true }];
+const breadcrumbs = [
+  { name: "All goals", href: "/goals", current: false },
+  { name: "Create goal", current: true },
+];
 
 const form = useForm({
   goal_name: "",
   goal_type: "",
   goal_value: "",
   goal_description: "",
-  project_code: "",
 });
+
+console.log(form.data);
 
 const submitForm = () => {
   form.post(route("goals.store"), {
@@ -36,7 +42,7 @@ const submitForm = () => {
   <AppLayout title="Create Goal">
     <template #header>
       <h2 class="text-xl font-semibold leading-tight text-gray-800">
-        Create Goal
+        <Breadcrumbs :pages="breadcrumbs" />
       </h2>
     </template>
     <div class="py-10 mx-auto max-w-7xl sm:px-6 lg:px-8">
