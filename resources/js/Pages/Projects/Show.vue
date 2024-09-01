@@ -40,8 +40,8 @@ const conversionScript = computed(() => {
     mt.async = true;
     mt.src = 'https://tracking.measuretank.com/conversion.js'; // Bruker conversion.js som nevnt
     mt.setAttribute('data-project-code', '${props.project.project_code}');
-    mt.setAttribute('data-conversion-type', 'purchase');  // Sett inn konverteringstype
-    mt.setAttribute('data-conversion-value', '199.99');   // Sett inn konverteringsverdi
+    mt.setAttribute('data-conversion-type', '');  // Conversion type STRING
+    mt.setAttribute('data-conversion-value', '');   // Conversion value INTEGER
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(mt, s);
   })();
