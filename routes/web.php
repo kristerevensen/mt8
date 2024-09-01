@@ -5,6 +5,7 @@ use App\Http\Controllers\CampaignLinkController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DataForSEOController;
+use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GrowthController;
 use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\ProjectController;
@@ -74,6 +75,8 @@ Route::middleware([
     /** Growth **/
     Route::get('/growth/insights', [GrowthController::class, 'insights']);
     Route::resource('growth', GrowthController::class);
+
+    Route::resource('goals', GoalsController::class);
 });
 
 /** API  **/
