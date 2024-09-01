@@ -53,7 +53,11 @@ const deleteGoal = (goal_id) => {
   }
 };
 
-const breadcrumbs = [{ name: "All goals", current: true }];
+const breadcrumbs = [
+  //set path to growth
+  { name: "Growth", href: "/growth", current: false },
+  { name: "Goals", current: true },
+];
 </script>
 
 

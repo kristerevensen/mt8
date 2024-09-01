@@ -44,7 +44,9 @@ const copyConversionCode = async () => {
   }
 };
 const breadcrumbs = [
-  { name: "All goals", href: "/goals", current: true },
+  // set path to growth
+  { name: "Growth", href: "/growth", current: false },
+  { name: "Goals", href: "/goals", current: true },
   { name: "Conversion Script", current: true },
 ];
 </script>
