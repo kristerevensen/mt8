@@ -16,14 +16,10 @@ defineProps({
 const showingNavigationDropdown = ref(false);
 
 const switchToTeam = (team) => {
-  const res = router.put(
+  router.put(
     route("current-team.update"),
-    {
-      team_id: team.id,
-    },
-    {
-      preserveState: false,
-    }
+    { team_id: team.id },
+    { preserveState: false }
   );
 };
 
@@ -31,39 +27,13 @@ const logout = () => {
   router.post(route("logout"));
 };
 
-// Hjelpefunksjon for å sjekke om den nåværende ruten starter med en bestemt sti
-const isActiveProjects = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/projects");
-};
-const isActiveCampaigns = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/campaigns");
-};
-const isActivePages = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/pages");
-};
-const isActiveContent = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/content");
-};
-const isActiveTechnical = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/technical");
-};
-const isActiveRanking = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/ranking");
-};
-const isActiveKeywords = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/keywords");
-};
-const isActiveGrowth = () => {
-  const currentUrl = usePage().url; // Hent den nåværende URL-en
-  return currentUrl.startsWith("/growth");
-};
+const isActiveProjects = () => usePage().url.startsWith("/projects");
+const isActiveCampaigns = () => usePage().url.startsWith("/campaigns");
+const isActivePages = () => usePage().url.startsWith("/pages");
+const isActiveContent = () => usePage().url.startsWith("/content");
+const isActiveTechnical = () => usePage().url.startsWith("/technical");
+const isActiveKeywords = () => usePage().url.startsWith("/keywords");
+const isActiveGrowth = () => usePage().url.startsWith("/growth");
 </script>
 
 <template>
@@ -74,11 +44,9 @@ const isActiveGrowth = () => {
 
     <div class="min-h-screen bg-gray-100">
       <nav class="bg-white border-b border-gray-100">
-        <!-- Primary Navigation Menu -->
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
             <div class="flex">
-              <!-- Logo -->
               <div class="flex items-center shrink-0">
                 <Link :href="route('dashboard')">
                   <ApplicationMark class="block w-auto h-9" />
@@ -86,57 +54,203 @@ const isActiveGrowth = () => {
               </div>
 
               <!-- Navigation Links -->
-              <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                <NavLink
-                  :href="route('dashboard')"
-                  :active="route().current('dashboard')"
-                >
-                  Dashboard
-                </NavLink>
-                <NavLink
-                  :href="route('projects.index')"
-                  :active="isActiveProjects()"
-                >
-                  Projects
-                </NavLink>
-                <NavLink :href="route('pages.index')" :active="isActivePages()">
-                  Pages
-                </NavLink>
-                <NavLink
-                  :href="route('keywords.index')"
-                  :active="isActiveKeywords()"
-                >
-                  Keywords
-                </NavLink>
-                <NavLink
-                  :href="route('technical.index')"
-                  :active="isActiveTechnical()"
-                >
-                  Technical
-                </NavLink>
-                <NavLink
-                  :href="route('content.index')"
-                  :active="isActiveContent()"
-                >
-                  Content
-                </NavLink>
-                <NavLink
-                  :href="route('campaigns.index')"
-                  :active="isActiveCampaigns()"
-                >
-                  Campaigns
-                </NavLink>
-                <NavLink
-                  :href="route('growth.index')"
-                  :active="isActiveGrowth()"
-                >
-                  Growth
-                </NavLink>
+              <div class="hidden pt-4 space-x-1 sm:-my-px sm:ml-10 sm:flex">
+                <!-- Dashboard -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Dashboard
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('dashboard')">
+                      Oversikt
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
+
+                <!-- Projects -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Projects
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('projects.index')">
+                      Oversikt
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
+
+                <!-- Pages -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Pages
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('pages.index')">
+                      Oversikt
+                    </DropdownLink>
+                    <DropdownLink :href="route('technical.index')">
+                      Technical
+                    </DropdownLink>
+                    <DropdownLink :href="route('content.index')">
+                      Content
+                    </DropdownLink>
+                    <DropdownLink :href="route('ranking.index')">
+                      Ranking
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
+
+                <!-- Keywords -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Keywords
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('keywords.index')">
+                      Oversikt
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
+
+                <!-- Campaigns -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Campaigns
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('campaigns.index')">
+                      Oversikt
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
+
+                <!-- Growth -->
+                <Dropdown align="left" width="48">
+                  <template #trigger>
+                    <button
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
+                    >
+                      Growth
+                      <svg
+                        class="ml-2 -mr-0.5 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </template>
+                  <template #content>
+                    <DropdownLink :href="route('growth.index')">
+                      Oversikt
+                    </DropdownLink>
+                    <DropdownLink :href="route('goals.index')">
+                      Goals
+                    </DropdownLink>
+                  </template>
+                </Dropdown>
               </div>
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-              <div class="relative ms-3">
+            <div class="hidden sm:flex sm:items-center sm:ml-6">
+              <div class="relative ml-3">
                 <!-- Teams Dropdown -->
                 <Dropdown
                   v-if="$page.props.jetstream.hasTeamFeatures"
@@ -152,7 +266,7 @@ const isActiveGrowth = () => {
                         {{ $page.props.auth.user.current_team.name }}
 
                         <svg
-                          class="ms-2 -me-0.5 h-4 w-4"
+                          class="ml-2 -mr-0.5 h-4 w-4"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -170,80 +284,66 @@ const isActiveGrowth = () => {
                   </template>
 
                   <template #content>
-                    <div class="w-60">
-                      <!-- Team Management -->
+                    <DropdownLink
+                      :href="
+                        route('teams.show', $page.props.auth.user.current_team)
+                      "
+                    >
+                      Team Settings
+                    </DropdownLink>
+
+                    <DropdownLink
+                      v-if="$page.props.jetstream.canCreateTeams"
+                      :href="route('teams.create')"
+                    >
+                      Create New Team
+                    </DropdownLink>
+
+                    <template v-if="$page.props.auth.user.all_teams.length > 1">
+                      <div class="border-t border-gray-200" />
+
                       <div class="block px-4 py-2 text-xs text-gray-400">
-                        Manage Team
+                        Switch Teams
                       </div>
 
-                      <!-- Team Settings -->
-                      <DropdownLink
-                        :href="
-                          route(
-                            'teams.show',
-                            $page.props.auth.user.current_team
-                          )
-                        "
-                      >
-                        Team Settings
-                      </DropdownLink>
-
-                      <DropdownLink
-                        v-if="$page.props.jetstream.canCreateTeams"
-                        :href="route('teams.create')"
-                      >
-                        Create New Team
-                      </DropdownLink>
-
-                      <!-- Team Switcher -->
                       <template
-                        v-if="$page.props.auth.user.all_teams.length > 1"
+                        v-for="team in $page.props.auth.user.all_teams"
+                        :key="team.id"
                       >
-                        <div class="border-t border-gray-200" />
+                        <form @submit.prevent="switchToTeam(team)">
+                          <DropdownLink as="button">
+                            <div class="flex items-center">
+                              <svg
+                                v-if="
+                                  team.id ==
+                                  $page.props.auth.user.current_team_id
+                                "
+                                class="w-5 h-5 mr-2 text-green-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
 
-                        <div class="block px-4 py-2 text-xs text-gray-400">
-                          Switch Teams
-                        </div>
-
-                        <template
-                          v-for="team in $page.props.auth.user.all_teams"
-                          :key="team.id"
-                        >
-                          <form @submit.prevent="switchToTeam(team)">
-                            <DropdownLink as="button">
-                              <div class="flex items-center">
-                                <svg
-                                  v-if="
-                                    team.id ==
-                                    $page.props.auth.user.current_team_id
-                                  "
-                                  class="w-5 h-5 text-green-400 me-2"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-
-                                <div>{{ team.name }}</div>
-                              </div>
-                            </DropdownLink>
-                          </form>
-                        </template>
+                              <div>{{ team.name }}</div>
+                            </div>
+                          </DropdownLink>
+                        </form>
                       </template>
-                    </div>
+                    </template>
                   </template>
                 </Dropdown>
               </div>
 
               <!-- Settings Dropdown -->
-              <div class="relative ms-3">
+              <div class="relative ml-3">
                 <Dropdown align="right" width="48">
                   <template #trigger>
                     <button
@@ -265,7 +365,7 @@ const isActiveGrowth = () => {
                         {{ $page.props.auth.user.name }}
 
                         <svg
-                          class="ms-2 -me-0.5 h-4 w-4"
+                          class="ml-2 -mr-0.5 h-4 w-4"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -283,25 +383,14 @@ const isActiveGrowth = () => {
                   </template>
 
                   <template #content>
-                    <!-- Account Management -->
-                    <div class="block px-4 py-2 text-xs text-gray-400">
-                      Manage Account
-                    </div>
-
-                    <DropdownLink :href="route('profile.show')">
-                      Profile
-                    </DropdownLink>
-
+                    <DropdownLink :href="route('profile.show')"
+                      >Profile</DropdownLink
+                    >
                     <DropdownLink
                       v-if="$page.props.jetstream.hasApiFeatures"
                       :href="route('api-tokens.index')"
+                      >API Tokens</DropdownLink
                     >
-                      API Tokens
-                    </DropdownLink>
-
-                    <div class="border-t border-gray-200" />
-
-                    <!-- Authentication -->
                     <form @submit.prevent="logout">
                       <DropdownLink as="button"> Log Out </DropdownLink>
                     </form>
@@ -311,7 +400,7 @@ const isActiveGrowth = () => {
             </div>
 
             <!-- Hamburger -->
-            <div class="flex items-center -me-2 sm:hidden">
+            <div class="flex items-center -mr-2 sm:hidden">
               <button
                 class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500"
                 @click="showingNavigationDropdown = !showingNavigationDropdown"
@@ -370,7 +459,7 @@ const isActiveGrowth = () => {
             <div class="flex items-center px-4">
               <div
                 v-if="$page.props.jetstream.managesProfilePhotos"
-                class="shrink-0 me-3"
+                class="mr-3 shrink-0"
               >
                 <img
                   class="object-cover w-10 h-10 rounded-full"
@@ -405,28 +494,24 @@ const isActiveGrowth = () => {
                 API Tokens
               </ResponsiveNavLink>
 
-              <!-- Authentication -->
               <form method="POST" @submit.prevent="logout">
                 <ResponsiveNavLink as="button"> Log Out </ResponsiveNavLink>
               </form>
 
-              <!-- Team Management -->
               <template v-if="$page.props.jetstream.hasTeamFeatures">
-                <div class="border-t border-gray-200" />
+                <div class="border-t border-gray-200"></div>
 
                 <div class="block px-4 py-2 text-xs text-gray-400">
                   Manage Team
                 </div>
 
-                <!-- Team Settings -->
                 <ResponsiveNavLink
                   :href="
                     route('teams.show', $page.props.auth.user.current_team)
                   "
                   :active="route().current('teams.show')"
+                  >Team Settings</ResponsiveNavLink
                 >
-                  Team Settings
-                </ResponsiveNavLink>
 
                 <ResponsiveNavLink
                   v-if="$page.props.jetstream.canCreateTeams"
@@ -436,9 +521,8 @@ const isActiveGrowth = () => {
                   Create New Team
                 </ResponsiveNavLink>
 
-                <!-- Team Switcher -->
                 <template v-if="$page.props.auth.user.all_teams.length > 1">
-                  <div class="border-t border-gray-200" />
+                  <div class="border-t border-gray-200"></div>
 
                   <div class="block px-4 py-2 text-xs text-gray-400">
                     Switch Teams
@@ -455,7 +539,7 @@ const isActiveGrowth = () => {
                             v-if="
                               team.id == $page.props.auth.user.current_team_id
                             "
-                            class="w-5 h-5 text-green-400 me-2"
+                            class="w-5 h-5 mr-2 text-green-400"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -482,7 +566,7 @@ const isActiveGrowth = () => {
 
       <!-- Page Heading -->
       <header v-if="$slots.header" class="bg-white shadow">
-        <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="px-4 py-3 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <slot name="header" />
         </div>
       </header>
