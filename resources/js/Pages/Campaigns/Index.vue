@@ -176,6 +176,12 @@ const campaignClicksOptions = {
       text: "Clicks per Campaign",
     },
   },
+  scales: {
+    y: {
+      beginAtZero: true, // Ensures the y-axis starts at 0
+      min: 0, // Explicitly sets the minimum value to 0
+    },
+  },
   onClick(event, elements) {
     if (elements.length > 0) {
       const index = elements[0].index;

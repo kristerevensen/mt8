@@ -88,4 +88,10 @@ class Project extends Model
     {
         return $this->hasMany(Goal::class, 'project_code', 'project_code');
     }
+
+    //sett relasjon til mange keyword lists
+    public function keywordLists()
+    {
+        return $this->hasMany(KeywordList::class, 'project_code', 'project_code');
+    }
 }

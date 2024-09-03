@@ -25,8 +25,12 @@ class GoalsController extends Controller
         $projectCode = Project::where('team_id', $currentTeamId)->first();
         $project_code = $projectCode->project_code;
 
-        // Fetch goals with pagination based on project_code
-        $goals = Goal::where('project_code', $project_code)->paginate(10);
+        // Fetch goals with pagination based on project_code and get how many conversions this goal has by joining in the table of converisons through goal_uuid
+        $goals = Goal::where('project_code', $project_code)->withCount('conversions')->paginate(10);
+
+        //$goals = Goal::where('project_code', $project_code)->paginate(10);
+
+        //dd($goals);
 
 
         return Inertia::render('Goals/Index', [

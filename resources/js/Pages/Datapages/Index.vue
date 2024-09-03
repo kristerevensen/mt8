@@ -160,6 +160,12 @@ const chartOptions = {
       text: "Pageviews Trend",
     },
   },
+  scales: {
+    y: {
+      beginAtZero: true, // Ensures the y-axis starts at 0
+      min: 0, // Explicitly sets the minimum value to 0
+    },
+  },
 };
 
 // Method to submit date range and store in localStorage

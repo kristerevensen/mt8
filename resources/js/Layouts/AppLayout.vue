@@ -80,7 +80,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('dashboard')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                   </template>
                 </Dropdown>
@@ -110,7 +110,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('projects.index')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                   </template>
                 </Dropdown>
@@ -140,7 +140,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('pages.index')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                     <DropdownLink :href="route('technical.index')">
                       Technical
@@ -179,7 +179,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('keywords.index')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                   </template>
                 </Dropdown>
@@ -209,7 +209,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('campaigns.index')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                   </template>
                 </Dropdown>
@@ -239,7 +239,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   </template>
                   <template #content>
                     <DropdownLink :href="route('growth.index')">
-                      Oversikt
+                      Overview
                     </DropdownLink>
                     <DropdownLink :href="route('goals.index')">
                       Goals
@@ -255,7 +255,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                 <Dropdown
                   v-if="$page.props.jetstream.hasTeamFeatures"
                   align="right"
-                  width="60"
+                  width="80"
                 >
                   <template #trigger>
                     <span class="inline-flex rounded-md">

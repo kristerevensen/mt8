@@ -8,6 +8,7 @@ use App\Http\Controllers\DataForSEOController;
 use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GrowthController;
 use App\Http\Controllers\KeywordController;
+use App\Http\Controllers\KeywordListController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\TechnicalController;
@@ -71,6 +72,10 @@ Route::middleware([
 
     /** Keywords **/
     Route::resource('keywords', KeywordController::class);
+
+    Route::resource('keyword-lists', KeywordListController::class)->except(['show']);
+    Route::get('keyword-lists/{list_uuid}', [KeywordListController::class, 'show'])->name('keyword-lists.show');
+
 
     /** Growth **/
     Route::get('/growth/insights', [GrowthController::class, 'insights']);

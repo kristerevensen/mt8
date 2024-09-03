@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref, computed } from "vue";
 import { Link, useForm } from "@inertiajs/vue3";
@@ -9,7 +8,7 @@ import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 
 // Define the goals prop
 const props = defineProps({
-  goals: Object, // Expecting a paginated object
+  goals: Object, // Expecting a paginated object with conversion counts
 });
 
 // Initialize form data for Inertia.js
@@ -54,27 +53,26 @@ const deleteGoal = (goal_id) => {
 };
 
 const breadcrumbs = [
-  //set path to growth
+  // Set path to growth
   { name: "Growth", href: "/growth", current: false },
   { name: "Goals", current: true },
 ];
 </script>
 
-
 <template>
   <Head title="Goals" />
   <AppLayout title="Goals">
     <template #header>
-      <div class="flex justify-between">
+      <div class="flex items-center justify-between">
         <div>
           <h2 class="text-xl font-semibold leading-tight text-gray-800">
             <Breadcrumbs :pages="breadcrumbs" />
           </h2>
         </div>
-        <div>
+        <div class="flex space-x-4">
           <Link
             :href="route('goals.create')"
-            class="px-4 py-3 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
           >
             + New Goal
           </Link>
@@ -126,7 +124,13 @@ const breadcrumbs = [
                     </th>
                     <th
                       scope="col"
-                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
+                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Conversions
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       Goal ID
                     </th>
@@ -159,6 +163,11 @@ const breadcrumbs = [
                           ? goal.goal_value.toFixed(2)
                           : "N/A"
                       }}
+                    </td>
+                    <td
+                      class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
+                    >
+                      {{ goal.conversions_count }}
                     </td>
                     <td>
                       <span
@@ -194,7 +203,7 @@ const breadcrumbs = [
                 </tbody>
                 <tbody v-else>
                   <tr>
-                    <td colspan="5" class="py-4 text-center text-gray-500">
+                    <td colspan="6" class="py-4 text-center text-gray-500">
                       No goals found.
                     </td>
                   </tr>
