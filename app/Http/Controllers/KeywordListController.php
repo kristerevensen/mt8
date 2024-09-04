@@ -20,14 +20,19 @@ class KeywordListController extends Controller
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
+
+
         // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_codes = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
 
         // Hent keyword lists knyttet til disse prosjektene
-        $keywordLists = KeywordList::whereIn('project_code', $project_codes)
+        $keywordLists = KeywordList::whereIn('project_code', $project_code)
             ->paginate(10);
 
+
+
         return Inertia::render('Keywords/Lists/Index', [
+            'project' => Project::where('team_id', $currentTeamId)->first(),
             'keywordLists' => $keywordLists,
         ]);
     }
@@ -37,16 +42,7 @@ class KeywordListController extends Controller
      */
     public function create()
     {
-        // Hent den autentiserte brukeren og det nåværende team ID
-        $user = Auth::user();
-        $currentTeamId = $user->current_team_id;
-
-        // Hent prosjektkoder assosiert med det nåværende teamet
-        $projects = Project::where('team_id', $currentTeamId)->pluck('project_code');
-
-        return Inertia::render('Keywords/Lists/Create', [
-            'projects' => $projects,
-        ]);
+        return Inertia::render('Keywords/Lists/Create', []);
     }
 
     /**
@@ -121,6 +117,17 @@ class KeywordListController extends Controller
 
         // Hent keyword list ved hjelp av list_uuid
         $keywordList = KeywordList::where('list_uuid', $list_uuid)->firstOrFail();
+        // Hent den autentiserte brukeren og det nåværende team ID
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+
+        // Hent prosjektkoder assosiert med det nåværende teamet
+        $projectCode = Project::where('team_id', $currentTeamId)->first()->project_code;
+
+        //oppdatert keyword list men sjekk at også projectCode er riktig
+        if ($keywordList->project_code != $projectCode) {
+            return redirect()->back()->with('error', 'You are not authorized to update this keyword list.');
+        }
 
         // Oppdater keyword list
         $keywordList->name = $request->name;

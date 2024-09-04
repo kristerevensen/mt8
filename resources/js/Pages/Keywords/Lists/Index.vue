@@ -29,7 +29,7 @@ const breadcrumbs = [
         </div>
         <div class="flex space-x-4">
           <Link
-            :href="route('projects.keyword-lists.create', project.id)"
+            :href="route('keyword-lists.create')"
             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
           >
             + New Keyword List
@@ -74,23 +74,13 @@ const breadcrumbs = [
                 class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap"
               >
                 <Link
-                  :href="
-                    route('projects.keyword-lists.show', [
-                      project.id,
-                      list.list_uuid,
-                    ])
-                  "
+                  :href="route('keyword-lists.show', [list.list_uuid])"
                   class="text-indigo-600 hover:text-indigo-900"
                 >
                   View
                 </Link>
                 <Link
-                  :href="
-                    route('projects.keyword-lists.edit', [
-                      project.id,
-                      list.list_uuid,
-                    ])
-                  "
+                  :href="route('keyword-lists.edit', [list.list_uuid])"
                   class="ml-4 text-indigo-600 hover:text-indigo-900"
                 >
                   Edit

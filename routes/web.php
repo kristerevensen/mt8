@@ -75,6 +75,7 @@ Route::middleware([
 
     Route::resource('keyword-lists', KeywordListController::class)->except(['show']);
     Route::get('keyword-lists/{list_uuid}', [KeywordListController::class, 'show'])->name('keyword-lists.show');
+    Route::get('keyword-lists/create', [KeywordListController::class, 'create'])->name('keyword-lists.create');
 
 
     /** Growth **/
