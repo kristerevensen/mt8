@@ -51,26 +51,7 @@ const copyTrackingCode = async () => {
   }
 };
 
-const copyConversionCode = async () => {
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Prøv å bruke Clipboard API hvis tilgjengelig
-      await navigator.clipboard.writeText(conversionScript.value);
-      alert("Conversion code copied to clipboard");
-    } else {
-      // Fallback-metode for eldre nettlesere
-      const textarea = document.createElement("textarea");
-      textarea.value = conversionScript.value;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      alert("Conversion code copied to clipboard ");
-    }
-  } catch (error) {
-    console.error("Failed to copy: ", error);
-  }
-};
+
 
 const deleteProject = (project_code) => {
   if (confirm("Are you sure you want to delete this project?")) {
@@ -147,14 +128,15 @@ const deleteProject = (project_code) => {
                       >
                       <div class="mt-2">
                         <textarea
-                          id="tracking"
-                          v-model="trackingScript"
-                          name="tracking"
-                          rows="14"
-                          class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                          readonly
-                        >
-                        </textarea>
+                            id="tracking"
+                            :value="trackingScript"
+                            name="tracking"
+                            rows="14"
+                            class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            readonly
+                            >
+                            </textarea>
+
                       </div>
                       <p class="mt-3 text-sm leading-6 text-gray-600">
                         Must be put in head of HTML document.
