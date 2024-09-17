@@ -224,11 +224,38 @@ const fetchFilteredData = () => {
     },
   });
 };
+
+const truncateUrl = (url, maxLength = 50) => {
+  if (url.length > maxLength) {
+    return url.substring(0, maxLength) + "...";
+  }
+  return url;
+};
+// New ref for copy message
+const copyMessage = ref("");
+
+// Function to copy URL to clipboard and show message
+const copyToClipboard = (url) => {
+  const textArea = document.createElement("textarea");
+  textArea.value = url;
+  document.body.appendChild(textArea);
+  textArea.select();
+
+  try {
+    document.execCommand("copy");
+    copyMessage.value = "Link copied to clipboard!";
+  } catch (err) {
+    copyMessage.value = "Failed to copy link. Please try again.";
+    console.error("Failed to copy: ", err);
+  }
+
+  document.body.removeChild(textArea);
+
+  setTimeout(() => {
+    copyMessage.value = "";
+  }, 3000); // Message disappears after 3 seconds
+};
 </script>
-
-
-
-
 <template>
   <Head title="Campaign Details" />
   <AppLayout title="Campaign Details">
@@ -300,6 +327,9 @@ const fetchFilteredData = () => {
         </div>
 
         <div class="flow-root mt-8">
+          <div v-if="copyMessage" class="mb-4 font-medium text-green-600">
+            {{ copyMessage }}
+          </div>
           <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div
               class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"
@@ -366,12 +396,14 @@ const fetchFilteredData = () => {
                       <td
                         class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                       >
-                        {{ link.landing_page }}
+                        {{ truncateUrl(link.landing_page) }}
                       </td>
                       <td
                         class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
                       >
-                        {{ link.tagged_url }}
+                        <a href="#" @click="copyToClipboard(link.tagged_url)"
+                          >{{ truncateUrl(link.tagged_url) }}
+                        </a>
                       </td>
                       <td
                         class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
