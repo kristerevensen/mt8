@@ -406,22 +406,37 @@ const copyToClipboard = (url) => {
                         class="px-3 py-4 text-sm font-medium text-gray-900 cursor-pointer whitespace-nowrap sm:pl-6"
                       >
                         {{
-                          new Date(link.date).toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
+                          new Date(link.created_at).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
                         }}
                       </td>
                       <td
                         class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                       >
-                        {{ truncateUrl(link.landing_page) }}
+                        <!-- create a link using a icon to click on so the user can view the page in a new window -->
+                        <a
+                          :href="link.landing_page"
+                          target="_blank"
+                          class="hover:underline hover:text-indigo-600"
+                        >
+                          {{ truncateUrl(link.landing_page) }}
+                        </a>
                       </td>
                       <td
                         class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap"
                       >
-                        <a href="#" @click="copyToClipboard(link.tagged_url)"
+                        <!-- copy to clipboard. Make the link underline on hover -->
+
+                        <a
+                          href="#"
+                          @click="copyToClipboard(link.tagged_url)"
+                          class="hover:underline hover:text-indigo-600"
                           >{{ truncateUrl(link.tagged_url) }}
                         </a>
                       </td>
