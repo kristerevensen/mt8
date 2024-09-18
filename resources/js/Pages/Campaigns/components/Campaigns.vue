@@ -64,6 +64,13 @@ const deleteCampaign = (campaign_id) => {
             <thead class="bg-gray-50">
               <tr>
                 <th
+                  @click="toggleSort('date')"
+                  scope="col"
+                  class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
+                >
+                  Date
+                </th>
+                <th
                   @click="toggleSort('campaign_name')"
                   scope="col"
                   class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
@@ -129,6 +136,16 @@ const deleteCampaign = (campaign_id) => {
               class="bg-white divide-y divide-gray-200"
             >
               <tr v-for="(campaign, index) in sortedCampaigns" :key="index">
+                <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
+                  <!-- convert campaign date to normal readable date: 24th May 24-->
+                  {{
+                    new Date(campaign.created_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  }}
+                </td>
                 <td
                   class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                 >

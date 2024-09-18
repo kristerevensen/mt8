@@ -45,39 +45,7 @@ class KeywordListController extends Controller
         return Inertia::render('Keywords/Lists/Create', []);
     }
 
-    /**
-     * Store a newly created keyword list in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
 
-        // Generer unikt list_uuid
-        $list_uuid = (string) Str::uuid();
-
-        // Hent den autentiserte brukeren og det nåværende team ID
-        $user = Auth::user();
-        $currentTeamId = $user->current_team_id;
-
-        // Hent prosjektkoder assosiert med det nåværende teamet
-        $projectCode = Project::where('team_id', $currentTeamId)->first()->project_code;
-
-        // Lagre ny keyword list
-        $keywordList = new KeywordList();
-        $keywordList->list_uuid = $list_uuid;
-        $keywordList->project_code = $projectCode;
-        $keywordList->name = $request->name;
-        $keywordList->description = $request->description;
-
-        if ($keywordList->save()) {
-            return redirect()->route('keyword-lists.index')->with('success', 'Keyword list created successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Failed to create keyword list.');
-        }
-    }
 
     /**
      * Display the specified keyword list.
@@ -108,6 +76,29 @@ class KeywordListController extends Controller
     /**
      * Update the specified keyword list in storage.
      */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+        $projectCode = Project::where('team_id', $currentTeamId)->first()->project_code;
+
+        $keywordList = new KeywordList();
+        $keywordList->project_code = $projectCode;
+        $keywordList->name = $request->name;
+        $keywordList->description = $request->description;
+
+        if ($keywordList->save()) {
+            return redirect()->route('keyword-lists.index')->with('success', 'Keyword list created successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to create keyword list.');
+        }
+    }
+
     public function update(Request $request, $list_uuid)
     {
         $request->validate([
@@ -115,21 +106,15 @@ class KeywordListController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Hent keyword list ved hjelp av list_uuid
         $keywordList = KeywordList::where('list_uuid', $list_uuid)->firstOrFail();
-        // Hent den autentiserte brukeren og det nåværende team ID
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
-
-        // Hent prosjektkoder assosiert med det nåværende teamet
         $projectCode = Project::where('team_id', $currentTeamId)->first()->project_code;
 
-        //oppdatert keyword list men sjekk at også projectCode er riktig
         if ($keywordList->project_code != $projectCode) {
             return redirect()->back()->with('error', 'You are not authorized to update this keyword list.');
         }
 
-        // Oppdater keyword list
         $keywordList->name = $request->name;
         $keywordList->description = $request->description;
 
@@ -139,6 +124,7 @@ class KeywordListController extends Controller
             return redirect()->back()->with('error', 'Failed to update keyword list.');
         }
     }
+
 
     /**
      * Remove the specified keyword list from storage.

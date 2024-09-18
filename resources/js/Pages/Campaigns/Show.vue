@@ -341,6 +341,13 @@ const copyToClipboard = (url) => {
                   <thead class="bg-gray-50">
                     <tr>
                       <th
+                        @click="toggleSort('date')"
+                        scope="col"
+                        class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
+                      >
+                        Date
+                      </th>
+                      <th
                         @click="toggleSort('landing_page')"
                         scope="col"
                         class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 cursor-pointer sm:pl-6"
@@ -393,6 +400,19 @@ const copyToClipboard = (url) => {
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-200">
                     <tr v-for="link in filteredLinks" :key="link.id">
+                      <!-- showing date in format: 24th may 24, togglesort -->
+                      <td
+                        @click="toggleSort('date')"
+                        class="px-3 py-4 text-sm font-medium text-gray-900 cursor-pointer whitespace-nowrap sm:pl-6"
+                      >
+                        {{
+                          new Date(link.date).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        }}
+                      </td>
                       <td
                         class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6"
                       >

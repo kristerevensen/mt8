@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
+import { ref, computed } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 import Pagination from "@/Components/Pagination.vue";
@@ -10,11 +11,23 @@ const props = defineProps({
   keywordLists: Object,
 });
 
+// Initialize form data for Inertia.js
+const form = useForm({});
+
 // Define breadcrumbs
 const breadcrumbs = [
-  { name: "Growth", href: "/growth", current: false },
+  { name: "Keywords", href: "/keywords", current: false },
   { name: "Keyword Lists", current: true },
 ];
+
+const deleteKeywordList = (list_uuid) => {
+  if (confirm("Are you sure you want to delete this keyword list?")) {
+    form.delete(route("keyword-lists.destroy", list_uuid), {
+      onSuccess: () => alert("Keyword list deleted successfully."),
+      onError: () => alert("Failed to delete keyword list."),
+    });
+  }
+};
 </script>
 
 <template>
@@ -32,7 +45,7 @@ const breadcrumbs = [
             :href="route('keyword-lists.create')"
             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
           >
-            + New Keyword List
+            + New List
           </Link>
         </div>
       </div>
@@ -85,14 +98,19 @@ const breadcrumbs = [
                 >
                   Edit
                 </Link>
+                <button
+                  @click="deleteKeywordList(list.list_uuid)"
+                  class="ml-4 text-red-600 hover:text-red-900"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
-
-        <!-- Pagination -->
-        <Pagination :links="keywordLists.links" />
       </div>
+      <!-- Pagination -->
+      <Pagination :links="keywordLists.links" />
     </div>
   </AppLayout>
 </template>

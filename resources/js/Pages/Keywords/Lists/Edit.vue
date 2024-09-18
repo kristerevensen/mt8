@@ -29,7 +29,6 @@ const form = useForm({
 
 const submitForm = () => {
   form.put(route("keyword-lists.update", props.keywordList.list_uuid), {
-    onSuccess: () => alert("Keyword list updated successfully."),
     onError: () => alert("There was an error updating the keyword list"),
   });
 };
