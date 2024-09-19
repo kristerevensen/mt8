@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { Link, useForm } from "@inertiajs/vue3";
+import { Link, useForm, Head } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 
 import Pagination from "@/Components/Pagination.vue";
