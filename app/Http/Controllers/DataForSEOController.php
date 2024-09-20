@@ -35,7 +35,7 @@ class DataForSEOController extends Controller
             if (!$response->successful()) {
                 throw new \Exception('Failed to fetch locations');
             }
-            dd($response);
+            //dd($response);
             // Step 2: Prepare data for bulk insertion
             $locations = $response->json('tasks.0.result');
 

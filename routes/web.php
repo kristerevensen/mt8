@@ -11,6 +11,7 @@ use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordListController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\SearchConsoleController;
 use App\Http\Controllers\TechnicalController;
 use App\Mail\Invitation;
 use Illuminate\Foundation\Application;
@@ -50,6 +51,15 @@ Route::middleware([
     Route::resource('campaign-links', CampaignLinkController::class);
     Route::get('/campaign-links/create', [CampaignLinkController::class, 'create'])->name('campaign-links.create');
     Route::get('/campaign-links/{link_token}/copy', [CampaignLinkController::class, 'copy'])->name('campaign-links.copy');
+
+    Route::get('/gsc/fetch', [SearchConsoleController::class, 'fetchDataPage'])->name('gsc.fetch');
+    Route::post('/gsc/fetch-data', [SearchConsoleController::class, 'fetchData'])->name('gsc.fetch-data');
+    Route::get('/gsc/overview', [SearchConsoleController::class, 'index'])->name('gsc.index');
+
+
+
+
+
 
     Route::resource('pages', DataController::class)->only([
         'index',
