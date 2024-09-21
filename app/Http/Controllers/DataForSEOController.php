@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\SeoTask;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class DataForSEOController extends Controller
 {
@@ -17,6 +18,8 @@ class DataForSEOController extends Controller
      */
     public function getLocations()
     {
+        ini_set('memory_limit', '256M'); // Øk minnegrensen hvis nødvendig
+
         $baseUrl = Config::get('dataforseo.base_url');
         $login = Config::get('dataforseo.login');
         $password = Config::get('dataforseo.password');
@@ -35,13 +38,18 @@ class DataForSEOController extends Controller
             if (!$response->successful()) {
                 throw new \Exception('Failed to fetch locations');
             }
-            //dd($response);
-            // Step 2: Prepare data for bulk insertion
+
+            // Step 2: Prepare data for bulk insertion, filter for countries only
             $locations = $response->json('tasks.0.result');
+
+            // Filter only countries
+            $countries = array_filter($locations, function ($location) {
+                return $location['location_type'] === 'Country';
+            });
 
             $data = [];
 
-            foreach ($locations as $location) {
+            foreach ($countries as $location) {
                 $data[] = [
                     'location_code' => $location['location_code'],
                     'location_name' => $location['location_name'],
@@ -55,18 +63,18 @@ class DataForSEOController extends Controller
             Location::truncate();
 
             // Step 4: Bulk insert the new data
-            // Use chunks to manage memory usage
-            foreach (array_chunk($data, 500) as $chunk) { // Adjust chunk size as needed
+            foreach (array_chunk($data, 500) as $chunk) {
                 Location::insert($chunk);
             }
 
-            return response()->json(['message' => 'Locations fetched, old records cleared, and new records stored successfully']);
+            return response()->json(['message' => 'Countries fetched, old records cleared, and new records stored successfully']);
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Error fetching locations: ' . $e->getMessage());
+            Log::error('Error fetching locations: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch locations'], 500);
         }
     }
+
 
 
     /**

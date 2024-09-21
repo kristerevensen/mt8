@@ -23,7 +23,6 @@ const breadcrumbs = [
 const deleteKeywordList = (list_uuid) => {
   if (confirm("Are you sure you want to delete this keyword list?")) {
     form.delete(route("keyword-lists.destroy", list_uuid), {
-      onSuccess: () => alert("Keyword list deleted successfully."),
       onError: () => alert("Failed to delete keyword list."),
     });
   }
