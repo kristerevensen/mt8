@@ -31,7 +31,7 @@ class CampaignController extends Controller
             ->withCount('links')
             ->with('links.clicks')
             ->where('created_by', Auth::id())
-            ->orderBy('created_at', 'desc')
+            ->orderBy('campaign.created_at', 'desc')
             ->paginate(10); // Endret fra get() til paginate(10)
 
         // Beregn antall klikk for hver kampanje
