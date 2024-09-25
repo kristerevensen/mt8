@@ -259,6 +259,7 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                   v-if="$page.props.jetstream.hasTeamFeatures"
                   align="right"
                   width="80"
+                  class="relative px-2 py-2"
                 >
                   <template #trigger>
                     <span class="inline-flex rounded-md">

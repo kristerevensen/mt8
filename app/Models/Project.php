@@ -102,4 +102,16 @@ class Project extends Model
             'keyword_uuid'   // Local key on the keywords table
         );
     }
+
+    // relationship to locations
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'project_location_code', 'location_code');
+    }
+
+    //set up relationship to language
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'project_language', 'language_code');
+    }
 }

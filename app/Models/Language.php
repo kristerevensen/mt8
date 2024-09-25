@@ -20,4 +20,10 @@ class Language extends Model
     ];
 
     // You can add additional methods and relationships here if needed
+
+    // set relationship to project, where many projects will have one language
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'project_language', 'language_code');
+    }
 }
