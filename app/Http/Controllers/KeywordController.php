@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Keyword;
+use App\Models\KeywordList;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,7 +22,9 @@ class KeywordController extends Controller
 
         // Hent prosjektkoder assosiert med det nåværende teamet
         $project_codes = Project::where('team_id', $currentTeamId)->pluck('project_code');
-
+        if ($project_codes->isEmpty()) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a keyword.');
+        }
         // Hent keywords knyttet til disse prosjektene og legg til paginering
         $keywords = Keyword::whereIn('project_code', $project_codes)
             ->paginate(10);
@@ -38,7 +41,16 @@ class KeywordController extends Controller
     public function create()
     {
         // You can add logic for creating keywords
-        return Inertia::render('Keywords/Create');
+
+        //fetch the keyword lists from dabase, that are related to the selected team and project code
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+        $project = Project::where('team_id', $currentTeamId)->firstOrFail();
+        $keywordLists = KeywordList::where('project_code', $project->project_code)->get();
+
+        return Inertia::render('Keywords/Create', [
+            'keywordLists' => $keywordLists,
+        ]);
     }
 
     /**
@@ -46,37 +58,47 @@ class KeywordController extends Controller
      */
     public function store(Request $request)
     {
-        // Validering av keywords input
+        // Validate keywords input
         $request->validate([
             'keywords' => 'required|string',
-            'list_id' => 'nullable|exists:keyword_lists,id',  // Validering av list_id
+            'list_uuid' => 'nullable|exists:keyword_lists,list_uuid',
         ]);
 
-        // Hent brukeren og teamets aktive prosjekt
+        // Get the current user's active project
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
-        // Hent prosjektet som er knyttet til teamet
+        // Fetch the project associated with the team
         $project = Project::where('team_id', $currentTeamId)->firstOrFail();
 
         // Split keywords by new lines and trim whitespace
         $keywords = array_filter(array_map('trim', explode("\n", $request->keywords)));
 
-        // Iterer over keywords og lagre dem i databasen
+        // Prepare the data for bulk insert
+        $data = [];
         foreach ($keywords as $keyword) {
-            Keyword::firstOrCreate([
+            $data[] = [
                 'keyword' => $keyword,
-                'project_code' => $project->project_code, // Henter project_code fra prosjektet
-            ], [
-                'keyword_uuid' => Str::uuid(), // Genererer en UUID
-                'location_code' => $project->project_country, // Bruker location_code fra prosjektet
-                'language_code' => $project->project_language, // Bruker language_code fra prosjektet
-                'list_id' => $request->list_id, // Lagrer valgt keyword list, hvis tilgjengelig
-            ]);
+                'keyword_uuid' => Str::uuid(), // Generate a UUID
+                'project_code' => $project->project_code,
+                'location_code' => $project->location_code,
+                'language_code' => $project->project_language,
+                'list_uuid' => $request->list_uuid,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
+        //dd($data);
+        // Use the upsert method to bulk insert and ignore duplicates
+        Keyword::upsert(
+            $data, // Data to insert
+            ['keyword', 'project_code'], // Unique columns to check for duplicates
+            [] // No columns to update, so it effectively ignores duplicates
+        );
 
-        return redirect()->route('keywords.index')->with('success', 'Keywords created successfully!');
+        return redirect()->route('keywords.index')->with('success', 'Keywords created successfully, and duplicates were ignored.');
     }
+
 
 
     /**

@@ -13,7 +13,7 @@ const props = defineProps({
 // Initialize form data using Inertia's useForm
 const form = useForm({
   keywords: "", // Bulk keywords input (one per line)
-  list_id: "", // The selected keyword list
+  list_uuid: "", // The selected keyword list
 });
 
 // Breadcrumbs for navigation
@@ -79,27 +79,30 @@ const submit = () => {
             <!-- Keyword List Dropdown -->
             <div class="mt-4">
               <label
-                for="list_id"
+                for="list_uuid"
                 class="block text-sm font-medium text-gray-700"
                 >Keyword List</label
               >
               <select
-                v-model="form.list_id"
-                id="list_id"
-                name="list_id"
+                v-model="form.list_uuid"
+                id="list_uuid"
+                name="list_uuid"
                 class="block w-full mt-1 border-gray-300 rounded-md shadow-sm sm:text-sm"
               >
                 <option value="" disabled>Select a list</option>
                 <option
                   v-for="list in keywordLists"
-                  :key="list.id"
-                  :value="list.id"
+                  :key="list.list_uuid"
+                  :value="list.list_uuid"
                 >
                   {{ list.name }}
                 </option>
               </select>
-              <div v-if="form.errors.list_id" class="mt-2 text-sm text-red-600">
-                {{ form.errors.list_id }}
+              <div
+                v-if="form.errors.list_uuid"
+                class="mt-2 text-sm text-red-600"
+              >
+                {{ form.errors.list_uuid }}
               </div>
             </div>
 

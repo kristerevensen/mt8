@@ -14,10 +14,9 @@ class CreateKeywordsTable extends Migration
     public function up()
     {
         Schema::create('keywords', function (Blueprint $table) {
-            $table->uuid('keyword_uuid')->primary(); // Unique ID for keyword
-            $table->string('keyword')->unique(); // The actual keyword
-            // legge til keyword list id, som også er foreign key til keyword_lists
-            $table->uuid('list_uuid'); // Foreign key to keyword lists
+            $table->uuid('keyword_uuid')->primary(); // Unique UUID for keyword
+            $table->string('keyword'); // The actual keyword
+            $table->uuid('list_uuid')->nullable(); // Foreign key to keyword lists, set as nullable for "on delete set null"
             $table->string('project_code'); // Project code that owns the keyword
             $table->string('spell')->nullable(); // Correct spelling if available
             $table->integer('location_code')->nullable(); // Location code from DataForSEO
@@ -32,8 +31,11 @@ class CreateKeywordsTable extends Migration
             $table->timestamp('analyzed_at')->nullable(); // When the keyword was analyzed
             $table->timestamps(); // Created and updated timestamps
 
-            //lag foreign key men ikke constraint til keyword_lists, slik at keyword ikke blir slettet, men bare fjerner id, hvis listen fjernes
+            // Foreign key constraint, with "on delete set null"
             $table->foreign('list_uuid')->references('list_uuid')->on('keyword_lists')->onDelete('set null');
+
+            // Add a unique constraint for keyword and project_code combination
+            $table->unique(['keyword', 'project_code']);
         });
     }
 

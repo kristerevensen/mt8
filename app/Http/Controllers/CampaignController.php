@@ -25,7 +25,9 @@ class CampaignController extends Controller
 
         // Hent prosjektkoder assosiert med det nåværende teamet
         $project_codes = Project::where('team_id', $currentTeamId)->pluck('project_code');
-
+        if ($project_codes->isEmpty()) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a campaign.');
+        }
         // Hent kampanjer knyttet til disse prosjektene med antall linker og klikk
         $campaigns = Campaign::whereIn('project_code', $project_codes)
             ->withCount('links')

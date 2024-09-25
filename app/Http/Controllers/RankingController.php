@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class RankingController extends Controller
@@ -14,6 +16,17 @@ class RankingController extends Controller
     {
         // Fetch technical pages from the database
         //$technicalPages = Technical::all();
+        // Hent den autentiserte brukeren og det nåværende team ID
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+
+        // Hent prosjektkoder assosiert med det nåværende teamet
+        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        if ($project_code->isEmpty()) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can view the ranking pages.');
+        }
+
+
 
         // Return the view with the fetched technical pages
         return Inertia::render('Ranking/Index', [
