@@ -21,17 +21,22 @@ class KeywordController extends Controller
         $currentTeamId = $user->current_team_id;
 
         // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_codes = Project::where('team_id', $currentTeamId)->pluck('project_code');
-        if ($project_codes->isEmpty()) {
+        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        if ($project_code->isEmpty()) {
             return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a keyword.');
         }
         // Hent keywords knyttet til disse prosjektene og legg til paginering
-        $keywords = Keyword::whereIn('project_code', $project_codes)
+        $keywords = Keyword::whereIn('project_code', $project_code)
             ->paginate(10);
+
+        //hent keyword lists fra databasen, som er relatert til det valgte teamet og prosjektkoden
+        $keywordLists = KeywordList::where('project_code', $project_code)->get();
 
         // Return keywords to the view
         return Inertia::render('Keywords/Index', [
             'keywords' => $keywords,
+            'project_code' => $project_code,
+            'keywordLists' => $keywordLists,
         ]);
     }
 

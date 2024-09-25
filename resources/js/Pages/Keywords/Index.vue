@@ -54,10 +54,13 @@ const toggleKeywordSelection = (keyword_uuid) => {
 
 // Get the list name from `list_uuid`, or return "Unlisted" if `list_uuid` is null
 const getListName = (list_uuid) => {
-  if (!list_uuid) return "Unlisted";
+  if (!list_uuid || !props.keywordLists || props.keywordLists.length === 0) {
+    return "Unlisted"; // Return "Unlisted" if no list_uuid or keywordLists is undefined/empty
+  }
   const list = props.keywordLists.find((list) => list.list_uuid === list_uuid);
   return list ? list.name : "Unlisted";
 };
+
 
 // Register keywords in the selected or new list
 const registerKeywordsInList = () => {
