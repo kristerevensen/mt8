@@ -8,6 +8,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class KeywordController extends Controller
@@ -181,24 +182,22 @@ class KeywordController extends Controller
      */
     public function addToList(Request $request)
     {
+
         // Validate incoming request
         $request->validate([
+            'keywords' => 'required|array', // Array of keyword UUIDs
             'list_uuid' => 'required|exists:keyword_lists,list_uuid', // Ensure the list exists
         ]);
 
-        // Hvis 'keywords' er null, sett den til et tomt array
-        $keywords = $request->keywords ?? [];
-
-        // Sjekk om keywords ikke er tomme
-        if (count($keywords) === 0) {
+        if (empty($request->keywords)) {
             return redirect()->back()->with('error', 'No keywords selected.');
         }
 
         // Retrieve the keywords based on the UUIDs passed in the request
-        $keywordObjects = Keyword::whereIn('keyword_uuid', $keywords)->get();
+        $keywords = Keyword::whereIn('keyword_uuid', $request->keywords)->get();
 
         // Update each keyword's list_uuid to the selected list
-        foreach ($keywordObjects as $keyword) {
+        foreach ($keywords as $keyword) {
             $keyword->list_uuid = $request->list_uuid; // Assign to the list
             $keyword->save(); // Save the keyword with the updated list
         }
@@ -206,6 +205,9 @@ class KeywordController extends Controller
         // Return a success response with a message
         return redirect()->back()->with('success', 'Keywords added to list successfully.');
     }
+
+
+
 
 
     /**
@@ -216,23 +218,19 @@ class KeywordController extends Controller
      */
     public function bulkDelete(Request $request)
     {
-        // Validate the request to ensure that an array of keywords is present
+        // Valider at 'keywords' er en array
         $request->validate([
-            'keywords' => 'required|array', // Array of keyword UUIDs
+            'keywords' => 'required|array',
         ]);
 
-        // Hvis 'keywords' er null, sett den til et tomt array
-        $keywords = $request->keywords ?? [];
-
-        // Hvis det ikke er noen søkeord, returner en feilmelding
-        if (count($keywords) === 0) {
+        // Sjekk om det faktisk er noen keywords i arrayet
+        if (!is_array($request->keywords) || count($request->keywords) === 0) {
             return redirect()->back()->with('error', 'No keywords selected.');
         }
 
-        // Retrieve and delete the keywords
-        Keyword::whereIn('keyword_uuid', $keywords)->delete();
+        // Slett søkeordene
+        Keyword::whereIn('keyword_uuid', $request->keywords)->delete();
 
-        // Return a success response with a message
         return redirect()->back()->with('success', 'Selected keywords deleted successfully.');
     }
 }

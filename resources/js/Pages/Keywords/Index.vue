@@ -57,24 +57,32 @@ const getListName = (list_uuid) => {
 };
 
 const addToList = (list_uuid) => {
+  console.log("Selected Keywords:", selectedKeywords.value); // Sjekk at valgte keywords har verdi
+
   if (selectedKeywords.value.length === 0) {
     alert("No keyword is selected.");
     return;
   }
 
-  console.log("Adding to list", list_uuid);
-  console.log("Selected keywords", selectedKeywords.value);
-
-  form.post(route("keywords.add_to_list"), {
-    data: {
-      keywords: selectedKeywords.value,
-      list_uuid,
+  // Bruker form.post og sender keywords og list_uuid direkte
+  form.post(
+    route("keywords.add_to_list"),
+    {
+      keywords: selectedKeywords.value, // Send valgte søkeord-UUID-er
+      list_uuid: list_uuid, // Send liste-UUID
     },
-    onSuccess: () => {
-      selectedKeywords.value = [];
-      router.reload(); // Laster listen på nytt
-    },
-  });
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        selectedKeywords.value = []; // Tøm valgene etter suksess
+        alert("Keywords added to list.");
+      },
+      onError: (error) => {
+        console.error("Error:", error);
+        alert("Failed to add keywords to list.");
+      },
+    }
+  );
 };
 
 const confirmDelete = () => {
@@ -89,6 +97,9 @@ const confirmDelete = () => {
       onSuccess: () => {
         selectedKeywords.value = [];
         router.reload(); // Laster listen på nytt
+      },
+      onError: (errors) => {
+        console.log(errors);
       },
     });
   }
@@ -140,7 +151,7 @@ const confirmDelete = () => {
                     :key="list.list_uuid"
                     href="#"
                     class="block px-4 py-2 hover:bg-gray-100"
-                    @click="addToList(list.list_uuid)"
+                    @click.prevent="addToList(list.list_uuid)"
                   >
                     {{ list.name }}
                   </a>
