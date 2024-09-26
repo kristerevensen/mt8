@@ -15,28 +15,43 @@ class KeywordController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
         // Hent prosjektkoder assosiert med det nåværende teamet
-        $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
-        if ($project_code->isEmpty()) {
-            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a keyword.');
+        $project = Project::where('team_id', $currentTeamId)->first();
+        $project_code = $project->project_code;
+
+        // Redirect to the projects index page if no project code is found
+        if (!$project_code) {
+            return redirect()->route('projects.index')->with('error', 'Please create a project first.');
         }
-        // Hent keywords knyttet til disse prosjektene og legg til paginering
-        $keywords = Keyword::whereIn('project_code', $project_code)
-            ->paginate(10);
+
+        // Get the search query
+        $search = $request->input('search');
+
+
+        // Fetch keywords based on the search query, or return all keywords if no search query
+        $keywords = Keyword::where('project_code', $project_code)
+            ->when($search, function ($query, $search) {
+                // Perform the search query in the database
+                return $query->where('keyword', 'like', '%' . $search . '%');
+            })
+            ->paginate(10); // Use pagination
 
         //hent keyword lists fra databasen, som er relatert til det valgte teamet og prosjektkoden
         $keywordLists = KeywordList::where('project_code', $project_code)->get();
 
-        // Return keywords to the view
+        // Return the results to the frontend
         return Inertia::render('Keywords/Index', [
-            'keywords' => $keywords,
+            'currentTeamId' => $currentTeamId,
+            'project' => $project,
             'project_code' => $project_code,
-            'keywordLists' => $keywordLists,
+            'keywords' => $keywords,
+            'keywordLists' => KeywordList::all(), // Add other necessary data here
+            'search' => $search, // Pass the search query back to the view
         ]);
     }
 
@@ -104,8 +119,6 @@ class KeywordController extends Controller
         return redirect()->route('keywords.index')->with('success', 'Keywords created successfully, and duplicates were ignored.');
     }
 
-
-
     /**
      * Display the specified resource.
      */
@@ -158,5 +171,68 @@ class KeywordController extends Controller
         $keyword->delete();
 
         return redirect()->route('keywords.index')->with('success', 'Keyword deleted successfully!');
+    }
+
+    /**
+     * Add selected keywords to a list.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function addToList(Request $request)
+    {
+        // Validate incoming request
+        $request->validate([
+            'list_uuid' => 'required|exists:keyword_lists,list_uuid', // Ensure the list exists
+        ]);
+
+        // Hvis 'keywords' er null, sett den til et tomt array
+        $keywords = $request->keywords ?? [];
+
+        // Sjekk om keywords ikke er tomme
+        if (count($keywords) === 0) {
+            return redirect()->back()->with('error', 'No keywords selected.');
+        }
+
+        // Retrieve the keywords based on the UUIDs passed in the request
+        $keywordObjects = Keyword::whereIn('keyword_uuid', $keywords)->get();
+
+        // Update each keyword's list_uuid to the selected list
+        foreach ($keywordObjects as $keyword) {
+            $keyword->list_uuid = $request->list_uuid; // Assign to the list
+            $keyword->save(); // Save the keyword with the updated list
+        }
+
+        // Return a success response with a message
+        return redirect()->back()->with('success', 'Keywords added to list successfully.');
+    }
+
+
+    /**
+     * Bulk delete selected keywords.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkDelete(Request $request)
+    {
+        // Validate the request to ensure that an array of keywords is present
+        $request->validate([
+            'keywords' => 'required|array', // Array of keyword UUIDs
+        ]);
+
+        // Hvis 'keywords' er null, sett den til et tomt array
+        $keywords = $request->keywords ?? [];
+
+        // Hvis det ikke er noen søkeord, returner en feilmelding
+        if (count($keywords) === 0) {
+            return redirect()->back()->with('error', 'No keywords selected.');
+        }
+
+        // Retrieve and delete the keywords
+        Keyword::whereIn('keyword_uuid', $keywords)->delete();
+
+        // Return a success response with a message
+        return redirect()->back()->with('success', 'Selected keywords deleted successfully.');
     }
 }
