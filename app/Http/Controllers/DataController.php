@@ -29,6 +29,10 @@ class DataController extends Controller
 
         // Get projects associated with the current team
         $project_code = $this->getProjectCode();
+        if ($project_code->isEmpty()) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a data page.');
+        }
+
         // Retrieve all data pages
         $dataPages = DataPage::with('project')
             ->whereIn('project_code', $project_code)
@@ -142,6 +146,7 @@ class DataController extends Controller
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
         $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+
         return $project_code;
     }
 

@@ -9,8 +9,9 @@ class Project extends Model
 {
     use HasFactory;
 
-    // define table name
+    // Define table name
     protected $table = 'projects';
+
     // Mass assignable attributes
     protected $fillable = [
         'project_code',
@@ -23,75 +24,94 @@ class Project extends Model
         'team_id',
     ];
 
-    /**
-     * Attributtene som bør konverteres til datotyper.
-     *
-     * @var array
-     */
+    // Casts to array for project_category (JSON column)
     protected $casts = [
         'project_category' => 'array',
     ];
 
-    /**
-     * Primærnøkkel for modellen.
-     *
-     * @var string
-     */
+    // Define primary key for the model
     protected $primaryKey = 'project_code';
 
-    /**
-     * Inkluderer ikke autoincrement.
-     *
-     * @var bool
-     */
+    // Indicate that the primary key is not auto-incrementing
     public $incrementing = false;
 
-    /**
-     * Tabellen som modellen bruker.
-     *
-     * @var string
-     */
+    // Set the primary key type as string (since it's UUID or a custom string)
     protected $keyType = 'string';
 
     /**
-     * Relasjon til SEO-oppgaver.
+     * Relationships
      */
+
+    // Relationship to SEO tasks
     public function seoTasks()
     {
         return $this->hasMany(SeoTask::class, 'project_code', 'project_code');
     }
 
-    // Define relationships
+    // Relationship to the project owner (User model)
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    // Relationship to the team that owns the project
     public function team()
     {
         return $this->belongsTo(Team::class, 'team_id');
     }
 
-    // Define the relationship with campaigns
+    // Relationship to campaigns
     public function campaigns()
     {
         return $this->hasMany(Campaign::class, 'project_code', 'project_code');
     }
 
+    // Relationship to link clicks
     public function linkClicks()
     {
         return $this->hasMany(LinkClick::class, 'project_code', 'project_code');
     }
 
-    //sett relasjon til mange goals også
+    // Relationship to goals
     public function goals()
     {
         return $this->hasMany(Goal::class, 'project_code', 'project_code');
     }
 
-    //sett relasjon til mange keyword lists
+    // Relationship to keyword lists
     public function keywordLists()
     {
         return $this->hasMany(KeywordList::class, 'project_code', 'project_code');
+    }
+
+    // Relationship to keywords
+    public function keywords()
+    {
+        return $this->hasMany(Keyword::class, 'project_code', 'project_code');
+    }
+
+    // Relationship to keyword search volumes
+    public function keywordSearchVolumes()
+    {
+        return $this->hasManyThrough(
+            KeywordSearchVolume::class,
+            Keyword::class,
+            'project_code',  // Foreign key on the keywords table
+            'keyword_uuid',  // Foreign key on the keyword_search_volumes table
+            'project_code',  // Local key on the projects table
+            'keyword_uuid'   // Local key on the keywords table
+        );
+    }
+
+    // relationship to locations
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'project_location_code', 'location_code');
+    }
+
+    //set up relationship to language
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'project_language', 'language_code');
     }
 }

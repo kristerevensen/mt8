@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->integer('location_code');
             $table->string('location_name');
+            $table->integer('location_code');
             $table->integer('location_code_parent')->nullable();
             $table->string('country_iso_code')->unique();
             $table->string('location_type');

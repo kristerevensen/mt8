@@ -20,10 +20,11 @@ class KeywordListController extends Controller
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
 
-
-
         // Hent prosjektkoder assosiert med det nåværende teamet
         $project_code = Project::where('team_id', $currentTeamId)->pluck('project_code');
+        if ($project_code->isEmpty()) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a keyword list.');
+        }
 
         // Hent keyword lists knyttet til disse prosjektene
         $keywordLists = KeywordList::whereIn('project_code', $project_code)
@@ -85,10 +86,10 @@ class KeywordListController extends Controller
 
         $user = Auth::user();
         $currentTeamId = $user->current_team_id;
-        $projectCode = Project::where('team_id', $currentTeamId)->first()->project_code;
+        $project_code = Project::where('team_id', $currentTeamId)->first()->project_code;
 
         $keywordList = new KeywordList();
-        $keywordList->project_code = $projectCode;
+        $keywordList->project_code = $project_code;
         $keywordList->name = $request->name;
         $keywordList->description = $request->description;
 

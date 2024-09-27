@@ -73,6 +73,9 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+
+
+
         $request->validate([
             'project_name' => 'required|string',
             'project_domain' => 'required|string',
@@ -81,6 +84,19 @@ class ProjectController extends Controller
             'project_category' => 'required',
             'team_id' => 'required|exists:teams,id',
         ]);
+
+        dd($request->project_location_code);
+        // get all data from the location_code selected from the locations table
+        $location = Location::where('location_code', $request->project_location_code)->first();
+        dd($location);
+        // get location_name, location_code, location_code_parent, country_iso_code, location_type from the locations table
+        $location_name = $location->location_name;
+        $location_code = $location->location_code;
+        $location_code_parent = $location->location_code_parent;
+        $country_iso_code = $location->country_iso_code;
+        $location_type = $location->location_type;
+
+
 
 
         $project = new Project();
@@ -159,12 +175,26 @@ class ProjectController extends Controller
 
     public function update(Request $request, $project_code)
     {
+        //dd($request->project_location_code);
+        // get all data from the location_code selected from the locations table
+        $location = Location::where('location_code', $request->project_location_code)->first();
+        // dd($location);
+        // get location_name, location_code, location_code_parent, country_iso_code, location_type from the locations table
+        $location_name = $location->location_name;
+        $location_code = $location->location_code;
+        $location_code_parent = $location->location_code_parent;
+        $country_iso_code = $location->country_iso_code;
+        $location_type = $location->location_type;
+
+
+
+
+
         $request->validate([
             'project_name' => 'required|string',
             'project_domain' => 'required|string',
             'project_language' => 'required|string',
-            'project_country' => 'required|string',
-            'project_category' => 'required|array',
+            'project_location_code' => 'required|string',
             'team_id' => 'required|exists:teams,id',
         ]);
 
@@ -172,7 +202,8 @@ class ProjectController extends Controller
         $project->project_name = $request->project_name;
         $project->project_domain = $request->project_domain;
         $project->project_language = $request->project_language;
-        $project->project_country = $request->project_country;
+        $project->project_country = $location_name;
+        $project->project_location_code = $location_code;
         $project->project_category = serialize($request->project_category); // Serialize categories array
         $project->team_id = $request->team_id;
         $project->save();

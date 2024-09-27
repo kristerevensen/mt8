@@ -23,6 +23,9 @@ class GoalsController extends Controller
 
         // Hent prosjektkoder assosiert med det nåværende teamet
         $projectCode = Project::where('team_id', $currentTeamId)->first();
+        if (!$projectCode) {
+            return redirect()->route('projects.index')->with('error', 'You need to create a project before you can create a goal.');
+        }
         $project_code = $projectCode->project_code;
 
         // Fetch goals with pagination based on project_code and get how many conversions this goal has by joining in the table of converisons through goal_uuid

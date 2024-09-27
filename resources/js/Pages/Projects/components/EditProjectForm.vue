@@ -20,7 +20,7 @@ const form = useForm({
   project_name: props.project.project_name || "",
   project_domain: props.project.project_domain || "",
   project_language: props.project.project_language || "",
-  project_country: props.project.project_country || "",
+  project_location_code: props.project.location_code || "",
   project_category: props.project.project_category || [],
   team_id: props.project.team_id || "",
 });
@@ -116,6 +116,7 @@ categories.value.sort((a, b) => a.name.localeCompare(b.name));
 
 // Function to handle form submission
 const submitForm = () => {
+  console.log(form);
   form.put(route("projects.update", props.project.project_code), {
     onSuccess: () => {
       console.log("Project updated successfully.");
@@ -221,19 +222,19 @@ const submitForm = () => {
         <InputLabel for="project_location" value="Project Country" />
         <select
           id="project_location"
-          v-model="form.project_country"
+          v-model="form.project_location_code"
           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"
         >
           <option value="" disabled>Select a Country</option>
           <option
             v-for="location in $page.props.locations"
-            :key="location.country_iso_code"
-            :value="location.country_iso_code"
+            :key="location.location_code"
+            :value="location.location_code"
           >
             {{ location.location_name }}
           </option>
         </select>
-        <InputError :message="form.errors.project_country" class="mt-2" />
+        <InputError :message="form.errors.location_code" class="mt-2" />
       </div>
 
       <!-- Language Dropdown -->
