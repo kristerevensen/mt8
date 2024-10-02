@@ -145,7 +145,8 @@ class DataForSEOController extends Controller
                 'location_name' => $project->project_country,
                 'target' => $project->project_domain,
                 'project_code' => $project->project_code,
-                "pingback_url" => 'http://my.measuretank.com/api/pingback?id=$id', // Adjust this URL based on your setup
+                "pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
+                "postback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
                 'status' => 'pending',
             ]);
 
@@ -157,22 +158,12 @@ class DataForSEOController extends Controller
 
     public function handlePingback(Request $request)
     {
-        $taskId = $request->query('id');
-        //if there is no parameter with the name id, then check the body
+        //  $taskId = $request->query('id');
+        // the postback and pingback will send either post or get to the pingback url or postback url. And needs to collect the id from the request
+        $taskId = $request->query('id') ?? $request->input('id');
+
         if (!$taskId) {
-            $taskId = $request->input('id');
-        }
-        // if there is no id in the body either, check the json body
-        if (!$taskId) {
-            $taskId = $request->json('id');
-        }
-        //if it is a get request, then check the query string
-        if (!$taskId) {
-            $taskId = $request->query('id');
-        }
-        //if it is a post request
-        if (!$taskId) {
-            $taskId = $request->input('id');
+            return response()->json(['error' => 'Task ID not provided'], 400);
         }
         // check to see if the task exists, and update the specific task based on task_id. Leave the tags
         $task = SeoTask::where('task_id', $taskId)->first();
