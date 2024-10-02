@@ -85,10 +85,10 @@ class ProjectController extends Controller
             'team_id' => 'required|exists:teams,id',
         ]);
 
-        dd($request->project_location_code);
+        //dd($request->all());
         // get all data from the location_code selected from the locations table
-        $location = Location::where('location_code', $request->project_location_code)->first();
-        dd($location);
+        $location = Location::where('country_iso_code', $request->project_country)->first();
+        // dd($location);
         // get location_name, location_code, location_code_parent, country_iso_code, location_type from the locations table
         $location_name = $location->location_name;
         $location_code = $location->location_code;
@@ -104,7 +104,8 @@ class ProjectController extends Controller
         $project->project_name = $request->project_name;
         $project->project_domain = $request->project_domain;
         $project->project_language = $request->project_language;
-        $project->project_country = $request->project_country;
+        $project->project_country = $location_name;
+        $project->project_location_code = $location_code;
         $project->project_category = serialize($request->input('project_category')); // Store as serialized string
         $project->owner_id = Auth::user()->id;
         $project->team_id = $request->team_id;
