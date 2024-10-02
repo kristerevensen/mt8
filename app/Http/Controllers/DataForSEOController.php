@@ -122,7 +122,8 @@ class DataForSEOController extends Controller
             [
                 "location_name" => $project->project_country, // Example, adapt based on your requirements
                 "target" => $project->project_domain,
-                "pingback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
+                "pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
+                "postback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
             ],
         ];
 

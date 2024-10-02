@@ -57,7 +57,8 @@ Route::middleware([
     Route::get('/gsc/overview', [SearchConsoleController::class, 'index'])->name('gsc.index');
 
 
-
+    Route::post('/pingback', [DataForSEOController::class, 'handlePingback']);
+    Route::get('/pingback', [DataForSEOController::class, 'handlePingback']);
 
 
 
