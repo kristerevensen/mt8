@@ -122,7 +122,6 @@ class DataForSEOController extends Controller
             [
                 "location_name" => $project->project_country, // Example, adapt based on your requirements
                 "target" => $project->project_domain,
-                "tag" => $project->project_code,
                 "pingback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
             ],
         ];
@@ -137,7 +136,7 @@ class DataForSEOController extends Controller
         ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
         dd($response->json());
         if ($response->successful()) {
-            $taskId = $response->json('tasks.0.task_id');
+            $taskId = $response->json('tasks.0.id');
             SeoTask::create([
                 'project_id' => $projectId,
                 'task_id' => $taskId,
@@ -158,9 +157,9 @@ class DataForSEOController extends Controller
     public function handlePingback(Request $request)
     {
         $taskId = $request->query('id');
-        $tag = $request->query('tag');
 
-        $task = SeoTask::where('tag', $tag)->first();
+        // check to see if the task exists, and update the specific task based on task_id. Leave the tags
+        $task = SeoTask::where('task_id', $taskId)->first();
 
         if ($task) {
             $task->status = 'completed';
