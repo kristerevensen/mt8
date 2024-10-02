@@ -30,6 +30,7 @@ class SeoTask extends Model
         'postback_url',
         'status',
         'result',
+        'task_id',
     ];
 
     /**

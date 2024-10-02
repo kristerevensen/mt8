@@ -137,6 +137,7 @@ class DataForSEOController extends Controller
         //dd($response->json());
         if ($response->successful()) {
             $taskId = $response->json('tasks.0.id');
+            //dd($taskId);
             SeoTask::create([
                 'project_id' => $projectId,
                 'task_id' => $taskId,
