@@ -158,6 +158,14 @@ class DataForSEOController extends Controller
     public function handlePingback(Request $request)
     {
         $taskId = $request->query('id');
+        //if there is no parameter with the name id, then check the body
+        if (!$taskId) {
+            $taskId = $request->input('id');
+        }
+        // if there is no id in the body either, check the json body
+        if (!$taskId) {
+            $taskId = $request->json('id');
+        }
 
         // check to see if the task exists, and update the specific task based on task_id. Leave the tags
         $task = SeoTask::where('task_id', $taskId)->first();
