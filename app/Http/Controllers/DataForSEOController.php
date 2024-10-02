@@ -120,10 +120,11 @@ class DataForSEOController extends Controller
 
         $post_array = [
             [
-                "location_name" => $project->project_country, // Example, adapt based on your requirements
+                "location_name" => $project->project_location_code, // Set the location code
                 "target" => $project->project_domain,
-                "pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
-                "postback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
+                'target_type' => 'site',
+                //"pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
+                //"postback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
             ],
         ];
 
@@ -134,10 +135,11 @@ class DataForSEOController extends Controller
         ])->withHeaders([
             'Authorization' => "Basic {$credentials}",
             'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
+        ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/live", $post_array);
         //dd($response->json());
         if ($response->successful()) {
             $taskId = $response->json('tasks.0.id');
+            $results = $response->json('tasks.0.result');
             //dd($taskId);
             SeoTask::create([
                 'project_id' => $projectId,
@@ -146,8 +148,9 @@ class DataForSEOController extends Controller
                 'location_name' => $project->project_country,
                 'target' => $project->project_domain,
                 'project_code' => $project->project_code,
-                "pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
-                "postback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
+                'results' => $results,
+                // "pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
+                // "postback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
                 'status' => 'pending',
             ]);
 
