@@ -145,7 +145,7 @@ class DataForSEOController extends Controller
                 'location_name' => $project->project_country,
                 'target' => $project->project_domain,
                 'project_code' => $project->project_code,
-                "pingback_url" => 'http://my.measuretank.com/api/pingback',
+                "pingback_url" => 'http://my.measuretank.com/api/pingback?id=' . $taskId, // Adjust this URL based on your setup
                 'status' => 'pending',
             ]);
 
