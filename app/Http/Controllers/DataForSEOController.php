@@ -123,7 +123,7 @@ class DataForSEOController extends Controller
                 "location_name" => $project->project_country, // Example, adapt based on your requirements
                 "target" => $project->project_domain,
                 "tag" => $project->project_code,
-                "pingback_url" => 'http://www.measuretank.com/api/pingback' // Adjust this URL based on your setup
+                "pingback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
             ],
         ];
 
@@ -135,16 +135,17 @@ class DataForSEOController extends Controller
             'Authorization' => "Basic {$credentials}",
             'Content-Type' => 'application/json',
         ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
-        //dd($response->json());
+        dd($response->json());
         if ($response->successful()) {
             $taskId = $response->json('tasks.0.task_id');
             SeoTask::create([
                 'project_id' => $projectId,
                 'task_id' => $taskId,
+                'location_code' => $project->project_location_code,
                 'location_name' => $project->project_country,
                 'target' => $project->project_domain,
                 'project_code' => $project->project_code,
-                "pingback_url" => 'http://www.measuretank.com/api/pingback',
+                "pingback_url" => 'http://my.measuretank.com/api/pingback',
                 'status' => 'pending',
             ]);
 

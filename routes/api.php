@@ -12,6 +12,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::post('/pingback', [DataForSEOController::class, 'handlePingback']);
+Route::get('/pingback', [DataForSEOController::class, 'handlePingback']);
 
 
 Route::get('/search-console-data', [SearchConsoleController::class, 'index']);
