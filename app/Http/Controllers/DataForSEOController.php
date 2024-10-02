@@ -166,7 +166,14 @@ class DataForSEOController extends Controller
         if (!$taskId) {
             $taskId = $request->json('id');
         }
-
+        //if it is a get request, then check the query string
+        if (!$taskId) {
+            $taskId = $request->query('id');
+        }
+        //if it is a post request
+        if (!$taskId) {
+            $taskId = $request->input('id');
+        }
         // check to see if the task exists, and update the specific task based on task_id. Leave the tags
         $task = SeoTask::where('task_id', $taskId)->first();
 
