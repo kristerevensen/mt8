@@ -134,7 +134,7 @@ class DataForSEOController extends Controller
             'Authorization' => "Basic {$credentials}",
             'Content-Type' => 'application/json',
         ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/task_post", $post_array);
-        dd($response->json());
+        //dd($response->json());
         if ($response->successful()) {
             $taskId = $response->json('tasks.0.id');
             SeoTask::create([
