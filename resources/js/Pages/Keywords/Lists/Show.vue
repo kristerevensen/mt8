@@ -113,7 +113,7 @@ onMounted(() => {
       <!-- Chart Section -->
       <div class="p-6 mb-8 bg-white rounded-lg shadow-md">
         <h3 class="mb-4 text-lg font-medium text-gray-900">
-          Monthly Search Volume
+          Monthly Search Volume - {{ keywordList.name }}
         </h3>
         <canvas ref="chartRef" height="150"></canvas>
       </div>
