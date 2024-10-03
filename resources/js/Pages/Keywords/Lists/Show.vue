@@ -143,19 +143,19 @@ onMounted(() => {
             <thead class="bg-gray-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                  class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
                   Keyword
                 </th>
                 <th
-                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                  class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
                   Total
                 </th>
                 <th
                   v-for="month in monthNames"
                   :key="month"
-                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                  class="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
                   {{ month }}
                 </th>
@@ -168,12 +168,12 @@ onMounted(() => {
                 :key="keyword.keyword_uuid || keyword.keyword"
               >
                 <td
-                  class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
+                  class="px-4 py-2 text-sm font-medium text-gray-900 whitespace-nowrap"
                 >
                   {{ keyword.keyword }}
                 </td>
                 <td
-                  class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
+                  class="px-4 py-2 text-sm font-medium text-gray-900 whitespace-nowrap"
                 >
                   {{ keyword.total_volume || 0 }}
                 </td>
@@ -182,7 +182,7 @@ onMounted(() => {
                   <td
                     v-for="month in monthNames"
                     :key="month"
-                    class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap"
+                    class="px-4 py-2 text-sm text-gray-900 whitespace-nowrap"
                     :style="{
                       backgroundColor: getBackgroundColor(
                         keyword.monthly_searches[monthIndex(month)] || 0,
