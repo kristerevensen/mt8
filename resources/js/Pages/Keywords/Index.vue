@@ -56,33 +56,66 @@ const getListName = (list_uuid) => {
   return list ? list.name : "Unlisted";
 };
 
-const addToList = (list_uuid) => {
-  console.log("Selected Keywords:", selectedKeywords.value); // Sjekk at valgte keywords har verdi
+const formAddToList = useForm({ keywords: [], list_uuid: "" });
 
+const addToList = (list_uuid) => {
+  // Sjekk om noen søkeord er valgt før du sender forespørselen
   if (selectedKeywords.value.length === 0) {
     alert("No keyword is selected.");
-    return;
+    return; // Avslutt funksjonen hvis ingen søkeord er valgt
   }
 
-  // Bruker form.post og sender keywords og list_uuid direkte
-  form.post(
-    route("keywords.add_to_list"),
+  // Oppdater `formAddToList` med de valgte søkeordene og listen
+  formAddToList.keywords = selectedKeywords.value;
+  formAddToList.list_uuid = list_uuid;
+
+  // Send forespørsel til backend ved å bruke formAddToList.post
+  formAddToList.post(
+    route("keywords.add_to_list"), // Rutenavn definert i backenden
     {
-      keywords: selectedKeywords.value, // Send valgte søkeord-UUID-er
-      list_uuid: list_uuid, // Send liste-UUID
-    },
-    {
-      preserveScroll: true,
+      preserveScroll: true, // Behold scroll-posisjon etter forespørselen
       onSuccess: () => {
-        selectedKeywords.value = []; // Tøm valgene etter suksess
-        alert("Keywords added to list.");
+        selectedKeywords.value = []; // Tøm valgte søkeord etter en vellykket forespørsel
+        console.log("Keywords added to list."); // Logg en suksessmelding til konsollen
+        //alert("Keywords added to list."); // Vis en suksessmelding
       },
       onError: (error) => {
-        console.error("Error:", error);
-        alert("Failed to add keywords to list.");
+        console.error("Error:", error); // Logg feilmelding til konsollen
+        alert("Failed to add keywords to list."); // Vis en feilmelding til brukeren
       },
     }
   );
+};
+
+const getSearchVolume = () => {
+  if (selectedKeywords.value.length === 0) {
+    alert("No keyword selected.");
+    return;
+  }
+
+  form.post(route("keywords.get_search_volume"), {
+    data: { keywords: selectedKeywords.value },
+    onSuccess: () => {
+      selectedKeywords.value = [];
+      alert("Search volume data fetched.");
+    },
+    onError: (errors) => {
+      console.log(errors);
+    },
+  });
+};
+
+// function to select all keywords, including the checkboxes on paginated pages
+const selectAll = (event) => {
+  if (event.target.checked) {
+    selectedKeywords.value = props.keywords.data.map(
+      (keyword) => keyword.keyword_uuid
+    );
+  } else {
+    selectedKeywords.value = [];
+  }
+  // console.log("number of selected keywords: " + selectedKeywords.value.length);
+  //console.log("Selected Keywords:", selectedKeywords.value);
 };
 
 const confirmDelete = () => {
@@ -157,6 +190,18 @@ const confirmDelete = () => {
                   </a>
                 </div>
 
+                <!-- Legge til nytt menypunkt: Get Search Volume -->
+                <span class="block px-4 py-2 font-semibold">Keyword data</span>
+                <div class="pl-4">
+                  <a
+                    href="#"
+                    class="block px-4 py-2 hover:bg-gray-100"
+                    @click.prevent="getSearchVolume"
+                  >
+                    Get Search Volume
+                  </a>
+                </div>
+
                 <!-- Delete Option with Confirmation -->
                 <div class="mt-2 border-t">
                   <a
@@ -192,6 +237,7 @@ const confirmDelete = () => {
           </form>
         </div>
       </div>
+
       <!-- Keyword list with checkboxes -->
       <div class="overflow-hidden bg-white shadow sm:rounded-lg">
         <table class="min-w-full divide-y divide-gray-200">
@@ -201,8 +247,10 @@ const confirmDelete = () => {
                 scope="col"
                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
               >
-                Select
+                <!--Legge til en checkbox som vil markere samtlige i listen i tabellen -->
+                <input type="checkbox" @click="selectAll" />
               </th>
+
               <th
                 scope="col"
                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"

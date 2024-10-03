@@ -89,6 +89,7 @@ Route::middleware([
     Route::get('keyword-lists/create', [KeywordListController::class, 'create'])->name('keyword-lists.create');
     Route::post('/keywords/add-to-list', [KeywordController::class, 'addToList'])->name('keywords.add_to_list');
     Route::post('/keywords/bulk-delete', [KeywordController::class, 'bulkDelete'])->name('keywords.bulk_delete');
+    Route::post('/import-keywords', [KeywordController::class, 'importKeywordsFromJson']);
 
 
 

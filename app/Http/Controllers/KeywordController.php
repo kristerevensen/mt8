@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Keyword;
 use App\Models\KeywordList;
+use App\Models\KeywordSearchVolume;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -182,32 +183,90 @@ class KeywordController extends Controller
      */
     public function addToList(Request $request)
     {
-
-        // Validate incoming request
-        $request->validate([
-            'keywords' => 'required|array', // Array of keyword UUIDs
-            'list_uuid' => 'required|exists:keyword_lists,list_uuid', // Ensure the list exists
+        // dd($request->all());
+        // multiple keywords can be selected, so validate that 'keywords' is an array
+        $validation = $request->validate([
+            'keywords' => 'required|array|exists:keywords,keyword_uuid', //keyword_uuid exists
+            'list_uuid' => 'required|exists:keyword_lists,list_uuid', //list_uuid
         ]);
+        // if validation fails, return an error message
+        if (!$validation) {
+            return redirect()->back()->with('error', 'Invalid data.');
+        }
 
         if (empty($request->keywords)) {
             return redirect()->back()->with('error', 'No keywords selected.');
         }
-
-        // Retrieve the keywords based on the UUIDs passed in the request
-        $keywords = Keyword::whereIn('keyword_uuid', $request->keywords)->get();
-
-        // Update each keyword's list_uuid to the selected list
-        foreach ($keywords as $keyword) {
-            $keyword->list_uuid = $request->list_uuid; // Assign to the list
-            $keyword->save(); // Save the keyword with the updated list
+        if (!$request->list_uuid) {
+            return redirect()->back()->with('error', 'No list selected.');
         }
+
+
+        // loop through all keywords in the array with a foreach and update the list_uuid. if there is a list_uuid there from before, add it to a list of plural list_uuids
+        $listUuids = [];
+        foreach ($request->keywords as $keywordUuid) {
+            $keyword = Keyword::where('keyword_uuid', $keywordUuid)->first();
+            $keyword->list_uuid = $request->list_uuid;
+            $keyword->save();
+
+            // Add the list_uuid to the list of list_uuids
+            $listUuids[] = $keyword->list_uuid;
+        }
+
+
 
         // Return a success response with a message
         return redirect()->back()->with('success', 'Keywords added to list successfully.');
     }
 
 
+    public function importKeywordsFromJson(Request $request)
+    {
+        // Hent JSON-strengen fra request (eller direkte fra databasen)
+        $jsonData = $request->input('json'); // Bruk 'json' som parameter i request
+        $projectCode = $request->input('project_code'); // Hent prosjektkoden fra request
+        $keywords = json_decode($jsonData, true); // Dekod JSON-strengen til en PHP-array
 
+        if (!$keywords) {
+            return response()->json(['error' => 'Invalid JSON data'], 400);
+        }
+
+        // Iterer gjennom hver keyword data i JSON-arrayen
+        foreach ($keywords as $keywordData) {
+            // Opprett en ny UUID for hvert keyword
+            $keywordUuid = (string) Str::uuid();
+
+            // Sett opp en ny Keyword-model og lagre den i keywords-tabellen
+            $keyword = Keyword::create([
+                'keyword_uuid' => $keywordUuid,
+                'keyword' => $keywordData['keyword'],
+                'project_code' => $projectCode, // Bruk prosjektkoden som tilhører nøkkelordet
+                'location_code' => $keywordData['location_code'] ?? null,
+                'language_code' => $keywordData['language_code'] ?? null,
+                'search_partners' => $keywordData['search_partners'] ?? false,
+                'competition' => $keywordData['competition'] ?? null,
+                'competition_index' => $keywordData['competition_index'] ?? null,
+                'search_volume' => $keywordData['search_volume'] ?? null,
+                'low_top_of_page_bid' => $keywordData['low_top_of_page_bid'] ?? null,
+                'high_top_of_page_bid' => $keywordData['high_top_of_page_bid'] ?? null,
+                'cpc' => $keywordData['cpc'] ?? null,
+                'analyzed_at' => now(), // Sett analyzed_at til nåværende tid
+            ]);
+
+            // Iterer gjennom månedlig søkevolum og lagre i keyword_search_volumes-tabellen
+            foreach ($keywordData['monthly_searches'] as $monthlyData) {
+                KeywordSearchVolume::create([
+                    'keyword_uuid' => $keywordUuid,
+                    'project_code' => $projectCode,
+                    'year' => $monthlyData['year'],
+                    'month' => $monthlyData['month'],
+                    'search_volume' => $monthlyData['search_volume'],
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Keywords and search volumes imported successfully']);
+    }
 
 
     /**
