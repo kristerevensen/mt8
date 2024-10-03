@@ -90,6 +90,21 @@ const renderChart = () => {
   }
 };
 
+// Function to get the background color based on the search volume value relative to the row
+const getBackgroundColor = (value, min, max) => {
+  if (max === min) {
+    // If all values are the same, return a neutral color
+    return "rgba(255, 255, 255, 0.3)";
+  }
+
+  // Calculate the relative intensity of the color based on the value's position between min and max
+  const intensity = (value - min) / (max - min);
+  const green = Math.round(255 * (1 - intensity)); // Higher values are greener
+  const red = Math.round(255 * intensity); // Lower values are redder
+
+  return `rgba(${red}, ${green}, 0, 0.3)`; // Resulting color based on the intensity
+};
+
 // Render the chart on mount
 onMounted(() => {
   renderChart();
@@ -161,15 +176,28 @@ onMounted(() => {
                   class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
                 >
                   {{ keyword.total_volume || 0 }}
-                  <!-- Display total volume -->
                 </td>
-                <td
-                  v-for="month in monthNames"
-                  :key="month"
-                  class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap"
-                >
-                  {{ keyword.monthly_searches[monthIndex(month)] || 0 }}
-                </td>
+                <!-- Calculate the min and max search volume values for each keyword -->
+                <template v-if="keyword.monthly_searches">
+                  <td
+                    v-for="month in monthNames"
+                    :key="month"
+                    class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap"
+                    :style="{
+                      backgroundColor: getBackgroundColor(
+                        keyword.monthly_searches[monthIndex(month)] || 0,
+                        Math.min(
+                          ...Object.values(keyword.monthly_searches).map(Number)
+                        ),
+                        Math.max(
+                          ...Object.values(keyword.monthly_searches).map(Number)
+                        )
+                      ),
+                    }"
+                  >
+                    {{ keyword.monthly_searches[monthIndex(month)] || 0 }}
+                  </td>
+                </template>
               </tr>
             </tbody>
           </table>
