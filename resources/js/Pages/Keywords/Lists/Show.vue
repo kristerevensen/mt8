@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Head, Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
@@ -10,14 +10,37 @@ import Chart from "chart.js/auto";
 const props = defineProps({
   project: Object,
   keywordList: Object,
-  keywords: Object, // Paginated keywords with search volume data
-  searchVolumes: Array, // Array of search volume data for each keyword per month
+  keywords: Object, // Paginated keywords with search volume data (use this directly)
+  searchVolumes: Object, // Original search volume data for the graph
+  keywordsdatafortable: Array, // Full keyword data for table with monthly search volumes
 });
 
-// Data tracking
-const selectedKeywords = ref([]); // For tracking selected keywords
+// Log data to ensure data integrity
+console.log("Keywords data:", props.keywords.data);
+console.log("Search Volumes data:", props.searchVolumes);
 
-// Initialize breadcrumbs with correct navigation
+// Month names for display and conversion
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+// Helper function to get the month index from the month name
+const monthIndex = (monthName) => {
+  return monthNames.indexOf(monthName) + 1; // Returns 1-12 based on monthName
+};
+
+// Breadcrumbs for navigation
 const breadcrumbs = computed(() => [
   { name: "Projects", href: "/projects" },
   {
@@ -37,34 +60,39 @@ const breadcrumbs = computed(() => [
   },
 ]);
 
-// Get the monthly search volume data for the chart
+// Compute monthly search volumes for the chart using searchVolumes prop
 const monthlySearchVolumes = computed(() => {
-  // Initialize an array with zeros for each month
   const monthlyData = new Array(12).fill(0);
 
-  // Iterate over the `props.searchVolumes` data to fill the monthlyData array
   if (props.searchVolumes) {
-    Object.entries(props.searchVolumes).forEach(([date, volume]) => {
-      const [year, month] = date.split("-").map(Number);
-      const monthIndex = month - 1; // Convert month to array index (0-11)
-      monthlyData[monthIndex] += volume; // Aggregate search volume for the month
+    Object.entries(props.searchVolumes).forEach(([month, volume]) => {
+      const monthIndex = parseInt(month, 10) - 1; // Convert month to array index (0-11)
+      monthlyData[monthIndex] = volume;
     });
   }
 
   return monthlyData;
 });
 
-// Function to format date
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+// Use `props.keywords.data` as the primary source for table display, applying necessary transformations
+const paginatedKeywords = computed(() => {
+  return props.keywords.data.map((keyword) => {
+    // Use the paginated data directly from props.keywords.data, which is sorted in the backend
+    const keywordFromTable = props.keywordsdatafortable.find(
+      (k) => k.keyword_uuid === keyword.keyword_uuid // Match by UUID for consistency
+    );
+    return {
+      keyword: keyword.keyword,
+      keyword_uuid: keyword.keyword_uuid,
+      monthly_searches: keywordFromTable
+        ? keywordFromTable.monthly_searches
+        : {},
+      total_volume: keywordFromTable ? keywordFromTable.total_volume : 0, // Include total_volume for sorting and display
+    };
   });
-};
+});
 
-// Chart setup for monthly search volume
+// Function to render the chart
 const chartRef = ref(null);
 const renderChart = () => {
   if (chartRef.value) {
@@ -72,20 +100,7 @@ const renderChart = () => {
     new Chart(ctx, {
       type: "bar",
       data: {
-        labels: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ],
+        labels: monthNames,
         datasets: [
           {
             label: "Total Monthly Search Volume",
@@ -108,16 +123,10 @@ const renderChart = () => {
   }
 };
 
-// Call renderChart on component mount
+// Render the chart on mount
 onMounted(() => {
   renderChart();
 });
-watch(
-  () => monthlySearchVolumes.value,
-  () => {
-    renderChart(); // Re-render the chart whenever `monthlySearchVolumes` changes
-  }
-);
 </script>
 
 <template>
@@ -127,7 +136,6 @@ watch(
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            <!-- Breadcrumbs component showing navigation -->
             <Breadcrumbs :pages="breadcrumbs" />
           </h2>
         </div>
@@ -153,27 +161,17 @@ watch(
             <thead class="bg-gray-50">
               <tr>
                 <th
-                  scope="col"
                   class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
                   Keyword
                 </th>
-                <!-- Add table headers for each month -->
                 <th
-                  v-for="month in [
-                    'Jan',
-                    'Feb',
-                    'Mar',
-                    'Apr',
-                    'May',
-                    'Jun',
-                    'Jul',
-                    'Aug',
-                    'Sep',
-                    'Oct',
-                    'Nov',
-                    'Dec',
-                  ]"
+                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                >
+                  Total
+                </th>
+                <th
+                  v-for="month in monthNames"
                   :key="month"
                   class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
@@ -182,53 +180,27 @@ watch(
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="keyword in keywords.data" :key="keyword.keyword_uuid">
+              <tr
+                v-for="keyword in paginatedKeywords"
+                :key="keyword.keyword_uuid || keyword.keyword"
+              >
                 <td
                   class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
                 >
-                  <Link
-                    :href="route('keywords.show', [keyword.keyword_uuid])"
-                    class="text-indigo-600 hover:text-indigo-900"
-                    title="View keyword details"
-                  >
-                    {{
-                      keyword.keyword.length > 30
-                        ? keyword.keyword.substring(0, 30) + "..."
-                        : keyword.keyword
-                    }}
-                  </Link>
+                  {{ keyword.keyword }}
                 </td>
-                <!-- Monthly Search Volume Data (limited to current keyword's monthly search volumes) -->
-                <!-- Monthly Search Volume Data -->
                 <td
-                  v-for="month in [
-                    'Jan',
-                    'Feb',
-                    'Mar',
-                    'Apr',
-                    'May',
-                    'Jun',
-                    'Jul',
-                    'Aug',
-                    'Sep',
-                    'Oct',
-                    'Nov',
-                    'Dec',
-                  ]"
+                  class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap"
+                >
+                  {{ keyword.total_volume || 0 }}
+                  <!-- Display total volume -->
+                </td>
+                <td
+                  v-for="month in monthNames"
                   :key="month"
                   class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap"
                 >
-                  {{
-                    // Map keyword.monthly_searches to month index and find the corresponding value
-                    keyword.monthly_searches && keyword.monthly_searches.length
-                      ? keyword.monthly_searches.find((search) => {
-                          const searchMonth = new Date(
-                            search.date
-                          ).toLocaleString("default", { month: "short" });
-                          return searchMonth === month;
-                        })?.search_volume || 0
-                      : 0
-                  }}
+                  {{ keyword.monthly_searches[monthIndex(month)] || 0 }}
                 </td>
               </tr>
             </tbody>
@@ -237,7 +209,7 @@ watch(
       </div>
 
       <!-- Pagination for keywords -->
-      <Pagination :links="keywords.links" />
+      <Pagination :links="props.keywords.links" />
     </div>
   </AppLayout>
 </template>

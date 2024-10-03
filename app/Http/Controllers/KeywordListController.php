@@ -9,6 +9,7 @@ use App\Models\KeywordSearchVolume;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KeywordListController extends Controller
 {
@@ -49,39 +50,72 @@ class KeywordListController extends Controller
      */
     public function show($list_uuid)
     {
-        // Hent keyword list ved hjelp av list_uuid
+        // Fetch the keyword list using the list_uuid
         $keywordList = KeywordList::where('list_uuid', $list_uuid)->firstOrFail();
-        $keywordListName = $keywordList->name;
 
-        // Hent søkeord relatert til denne listen, med relasjonen `monthlySearchVolumes`
-        $keywords = $keywordList->keywords()->with('monthlySearchVolumes')->paginate(10);
+        // Fetch keywords related to this list with pagination for the table
+        $keywords = $keywordList->keywords()->paginate(10);
 
-        // Hent alle søkeord relatert til listen (uten paginering) for å hente alle volumene til grafen
-        $allKeywords = $keywordList->keywords()->pluck('keyword_uuid');
-
-        // Hent månedlig søkevolum for ALLE søkeord i listen (uavhengig av paginering)
-        $searchVolumes = KeywordSearchVolume::whereIn('keyword_uuid', $allKeywords)
-            ->select('year', 'month', 'search_volume')
-            ->orderBy('year')
-            ->orderBy('month')
-            ->orderBy('search_volume')
+        // Fetch search volume data for each keyword and aggregate by month
+        $keywordSearchVolumes = Keyword::where('project_code', $keywordList->project_code)
+            ->where('list_uuid', $list_uuid)
+            ->with(['searchVolumes' => function ($query) {
+                $query->select(
+                    'keyword_uuid',
+                    'month',
+                    DB::raw('SUM(search_volume) as total_volume')
+                )
+                    ->groupBy('keyword_uuid', 'month');
+            }])
             ->get()
-            ->groupBy(function ($date) {
-                return $date->year . '-' . $date->month;
+            ->map(function ($keyword) {
+                // Calculate the total search volume for the keyword
+                $totalVolume = $keyword->searchVolumes->sum('total_volume');
+
+                // Create a new array with default values of 0 for each month (1-12)
+                $monthlySearches = array_fill(1, 12, 0);
+
+                // Populate monthly search volumes with values from the query result
+                foreach ($keyword->searchVolumes as $volume) {
+                    $monthlySearches[$volume->month] = $volume->total_volume;
+                }
+
+                return [
+                    'keyword' => $keyword->keyword,
+                    'keyword_uuid' => $keyword->keyword_uuid,
+                    'monthly_searches' => $monthlySearches,
+                    'total_volume' => $totalVolume, // Total volume for sorting purposes
+                ];
             })
-            ->map(function ($group) {
-                return $group->sum('search_volume');
+            // Sort the collection by total volume in descending order
+            ->sortByDesc('total_volume') // Sort by the total volume descending
+            ->values(); // Reset keys after sorting to ensure proper indexing
+
+        // Debugging: Check the sorted results
+        dd($keywordSearchVolumes);
+
+        // Aggregate monthly search volumes for the entire keyword list (for the chart)
+        $searchVolumes = KeywordSearchVolume::whereIn('keyword_uuid', $keywordList->keywords()->pluck('keyword_uuid'))
+            ->select('month', DB::raw('SUM(search_volume) as total_volume'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->month => $item->total_volume];
             })
             ->toArray();
 
         return Inertia::render('Keywords/Lists/Show', [
             'keywordList' => $keywordList,
-            'keywordListName' => $keywordListName,
-            'keywords' => $keywords, // Paginated keywords for the table
-            'searchVolumes' => $searchVolumes, // All search volumes for the chart
-            'project' => Project::where('project_code', $keywordList->project_code)->first(), // Send prosjektdata
+            'keywords' => $keywords, // Pass paginated keywords to the table
+            'searchVolumes' => $searchVolumes, // Pass aggregated search volumes for the chart
+            'project' => Project::where('project_code', $keywordList->project_code)->first(),
+            'keywordsdatafortable' => $keywordSearchVolumes, // Keywords with correctly aggregated monthly search volumes and totals
         ]);
     }
+
+
+
 
 
 
