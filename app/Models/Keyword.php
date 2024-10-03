@@ -69,4 +69,10 @@ class Keyword extends Model
     {
         return !is_null($this->analyzed_at);
     }
+
+    // Keyword.php
+    public function monthlySearchVolumes()
+    {
+        return $this->hasMany(KeywordSearchVolume::class, 'keyword_uuid', 'keyword_uuid');
+    }
 }

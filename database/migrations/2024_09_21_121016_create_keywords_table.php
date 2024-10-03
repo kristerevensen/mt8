@@ -28,11 +28,13 @@ class CreateKeywordsTable extends Migration
             $table->decimal('low_top_of_page_bid', 10, 2)->nullable(); // Low bid CPC
             $table->decimal('high_top_of_page_bid', 10, 2)->nullable(); // High bid CPC
             $table->decimal('cpc', 10, 2)->nullable(); // Cost per click
+            $table->json('keyword_annotations')->nullable(); // Store keyword annotations as JSON data (if needed)
             $table->timestamp('analyzed_at')->nullable(); // When the keyword was analyzed
             $table->timestamps(); // Created and updated timestamps
 
-            // Foreign key constraint, with "on delete set null"
+            // Foreign key constraints
             $table->foreign('list_uuid')->references('list_uuid')->on('keyword_lists')->onDelete('set null');
+            $table->foreign('project_code')->references('project_code')->on('projects')->onDelete('cascade'); // Foreign key to projects, cascade on delete
 
             // Add a unique constraint for keyword and project_code combination
             $table->unique(['keyword', 'project_code']);

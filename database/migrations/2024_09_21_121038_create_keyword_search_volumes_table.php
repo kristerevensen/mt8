@@ -22,8 +22,10 @@ class CreateKeywordSearchVolumesTable extends Migration
             $table->integer('search_volume')->nullable(); // Search volume for the month
             $table->timestamps(); // Created and updated timestamps
 
-            // Foreign key constraint
-            $table->foreign('keyword_uuid')->references('keyword_uuid')->on('keywords')->onDelete('cascade');
+            // Foreign key constraints to ensure data integrity
+            $table->foreign('keyword_uuid')->references('keyword_uuid')->on('keywords')->onDelete('cascade'); // Cascade on delete
+            $table->foreign('project_code')->references('project_code')->on('projects')->onDelete('cascade'); // Cascade on delete
+
         });
     }
 

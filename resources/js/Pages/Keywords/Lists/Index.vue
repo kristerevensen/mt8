@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, useForm, router } from "@inertiajs/vue3"; // Legg til router for å navigere eller sende forespørsler
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
 import Pagination from "@/Components/Pagination.vue";
@@ -20,6 +20,29 @@ const breadcrumbs = [
   { name: "Keyword Lists", current: true },
 ];
 
+// Funksjon for å kjøre getWebsiteKeywords
+const getWebsiteKeywords = () => {
+  if (!props.project) {
+    alert("No project selected.");
+    return;
+  }
+
+  // Kjør API-kall til getWebsiteKeywords-ruten med projectId
+  router.post(
+    route("website.keywords", { projectId: props.project.id }),
+    {},
+    {
+      onSuccess: () => {
+        alert("Website keywords fetched successfully.");
+      },
+      onError: () => {
+        alert("Failed to fetch website keywords.");
+      },
+    }
+  );
+};
+
+// Funksjon for å slette en keyword-liste
 const deleteKeywordList = (list_uuid) => {
   if (confirm("Are you sure you want to delete this keyword list?")) {
     form.delete(route("keyword-lists.destroy", list_uuid), {
@@ -46,6 +69,13 @@ const deleteKeywordList = (list_uuid) => {
           >
             + New List
           </Link>
+          <!-- Knapp for å kjøre getWebsiteKeywords-funksjonen -->
+          <button
+            @click="getWebsiteKeywords"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-500"
+          >
+            Fetch Website Keywords
+          </button>
         </div>
       </div>
     </template>

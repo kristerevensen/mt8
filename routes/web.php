@@ -90,7 +90,7 @@ Route::middleware([
     Route::post('/keywords/add-to-list', [KeywordController::class, 'addToList'])->name('keywords.add_to_list');
     Route::post('/keywords/bulk-delete', [KeywordController::class, 'bulkDelete'])->name('keywords.bulk_delete');
     Route::post('/import-keywords', [KeywordController::class, 'importKeywordsFromJson']);
-
+    Route::post('/keywords/website/get', [KeywordController::class, 'getWebsiteKeywords'])->name('website.keywords');
 
 
     /** Growth **/

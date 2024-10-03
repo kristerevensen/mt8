@@ -175,6 +175,21 @@ class KeywordController extends Controller
         return redirect()->route('keywords.index')->with('success', 'Keyword deleted successfully!');
     }
 
+    public function getWebsiteKeywords()
+    {
+        // get the project code
+        $user = Auth::user();
+        $currentTeamId = $user->current_team_id;
+        $project = Project::where('team_id', $currentTeamId)->firstOrFail();
+        $project_code = $project->project_code;
+
+        $dataForSeoController = new DataForSEOController();
+        $dataForSeoController->getWebsiteKeywords($project_code);
+
+        //return back with message
+        return redirect()->back()->with('success', 'Website keywords fetched successfully.');
+    }
+
     /**
      * Add selected keywords to a list.
      *

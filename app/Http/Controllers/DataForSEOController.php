@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Keyword;
+use App\Models\KeywordList;
+use App\Models\KeywordSearchVolume;
 use Illuminate\Http\Request;
 use App\Models\Location;
 use App\Models\Language;
@@ -9,7 +12,9 @@ use App\Models\Project;
 use App\Models\SeoTask;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class DataForSEOController extends Controller
 {
@@ -108,59 +113,233 @@ class DataForSEOController extends Controller
 
 
 
-    public function createSeoTask($projectId)
+    public function getWebsiteKeywords($projectId)
     {
-        $project = Project::findOrFail($projectId);
+        try {
+            $project = Project::findOrFail($projectId);
 
-        $baseUrl = config('dataforseo.url');
-        $login = config('dataforseo.login');
-        $password = config('dataforseo.password');
+            // Check if keywords for the project have already been collected this month.
+            $task = SeoTask::where('project_code', $project->project_code)
+                ->where('tag', 'Website Keywords')
+                ->where('status', 'completed')
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        $credentials = base64_encode("{$login}:{$password}");
+            if ($task && $task->created_at->isCurrentMonth()) {
+                // If keywords have already been fetched this month, use the existing data.
+                $results = $task->result;
+            } else {
+                // Fetch new data from DataForSEO.
+                $results = $this->fetchKeywordsFromDataForSEO($project);
 
-        $post_array = [
-            [
-                "location_code" => $project->project_location_code, // Set the location code
-                "target" => $project->project_domain,
-                'target_type' => 'site',
-                //"pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
-                //"postback_url" => 'http://my.measuretank.com/api/pingback' // Adjust this URL based on your setup
-            ],
-        ];
+                if (!$results) {
+                    return response()->json(['error' => 'Failed to fetch keywords from DataForSEO'], 500);
+                }
 
-        //dd($post_array);
+                // Store the new task in the SeoTask table.
+                SeoTask::create([
+                    'project_id' => $projectId,
+                    'task_id' => $results['task_id'],
+                    'location_code' => $project->project_location_code,
+                    'location_name' => $project->project_country,
+                    'target' => $project->project_domain,
+                    'project_code' => $project->project_code,
+                    'result' => $results['data'],
+                    'tag' => 'Website Keywords',
+                    'status' => 'completed',
+                ]);
+                $results = $results['data'];
+            }
 
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
-            'Authorization' => "Basic {$credentials}",
-            'Content-Type' => 'application/json',
-        ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/live", $post_array);
-        //dd($response->json());
-        if ($response->successful()) {
-            $taskId = $response->json('tasks.0.id');
+            // Find or create the "Website" keyword list.
+            $websiteKeywordList = KeywordList::firstOrCreate(
+                ['name' => 'Website', 'project_code' => $project->project_code],
+                ['list_uuid' => Str::uuid(), 'description' => 'Keywords for website']
+            );
 
-            $results = $response->json(key: 'tasks.0.result');
+            $listUuid = $websiteKeywordList->list_uuid;
 
-            //dd($taskId);
-            SeoTask::create([
-                'project_id' => $projectId,
-                'task_id' => $taskId,
-                'location_code' => $project->project_location_code,
-                'location_name' => $project->project_country,
-                'target' => $project->project_domain,
-                'project_code' => $project->project_code,
-                'result' => $results,
-                //"pingback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
-                //"postback_url" => 'http://my.measuretank.com/api/pingback', // Adjust this URL based on your setup
-                'status' => 'completed',
-            ]);
+            // Store keywords and search volume data.
+            $this->storeKeywordsAndVolumes($results, $listUuid, $project->project_code);
 
-            return response()->json(['message' => 'Task created successfully']);
-        } else {
-            return response()->json(['error' => 'Failed to create task'], 500);
+            return response()->json(['message' => 'Task processed successfully, keywords saved and assigned to Website list']);
+        } catch (\Exception $e) {
+            Log::error("Error processing website keywords: {$e->getMessage()}");
+            return response()->json(['error' => 'Failed to process website keywords'], 500);
         }
     }
+
+    /**
+     * Fetch keywords from DataForSEO.
+     *
+     * @param Project $project
+     * @return array|bool
+     */
+    private function fetchKeywordsFromDataForSEO(Project $project)
+    {
+        try {
+            $baseUrl = config('dataforseo.url');
+            $login = config('dataforseo.login');
+            $password = config('dataforseo.password');
+            $credentials = base64_encode("{$login}:{$password}");
+
+            $post_array = [
+                [
+                    "location_code" => $project->project_location_code,
+                    "target" => $project->project_domain,
+                    'target_type' => 'site',
+                    'tag' => 'Website Keywords',
+                ],
+            ];
+
+            // Send request to DataForSEO.
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => "Basic {$credentials}",
+                    'Content-Type' => 'application/json',
+                ])->post("{$baseUrl}/v3/keywords_data/google_ads/keywords_for_site/live", $post_array);
+
+            if ($response->successful()) {
+                $taskId = $response->json('tasks.0.id');
+                $results = $response->json('tasks.0.result');
+                return ['task_id' => $taskId, 'data' => $results];
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error fetching keywords from DataForSEO: {$e->getMessage()}");
+            return false;
+        }
+    }
+
+    /**
+     * Store keywords and their respective search volumes.
+     *
+     * @param array $results
+     * @param string $listUuid
+     * @param string $projectCode
+     */
+    private function storeKeywordsAndVolumes(array $results, string $listUuid, string $projectCode)
+    {
+        try {
+            foreach ($results as $item) {
+                // Use a database transaction to maintain integrity.
+                DB::transaction(function () use ($item, $listUuid, $projectCode) {
+                    // Check if the keyword already exists.
+                    $existingKeyword = Keyword::where('keyword', $item['keyword'])
+                        ->where('project_code', $projectCode)
+                        ->first();
+
+                    // Determine whether to update or create the keyword.
+                    $keyword = $existingKeyword ? $this->updateKeyword($existingKeyword, $item, $listUuid) : $this->createKeyword($item, $listUuid, $projectCode);
+
+                    // Store monthly search volumes.
+                    if ($keyword && isset($item['monthly_searches'])) {
+                        $this->storeKeywordSearchVolumes($keyword->keyword_uuid, $item['monthly_searches'], $projectCode);
+                    }
+                });
+            }
+        } catch (\Exception $e) {
+            Log::error("Error storing keywords and volumes: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Update existing keyword with new data.
+     *
+     * @param Keyword $existingKeyword
+     * @param array $item
+     * @param string $listUuid
+     * @return Keyword
+     */
+    private function updateKeyword(Keyword $existingKeyword, array $item, string $listUuid): Keyword
+    {
+        // Legg til logging for å se verdien av `listUuid` og om `update`-operasjonen blir kalt.
+        Log::info("Updating keyword {$existingKeyword->keyword_uuid} with list_uuid: {$listUuid}");
+
+        // Sørg for at `list_uuid` blir satt før oppdatering
+        $existingKeyword->list_uuid = $listUuid;
+        $existingKeyword->spell = $item['spell'] ?? null;
+        $existingKeyword->location_code = $item['location_code'] ?? null;
+        $existingKeyword->language_code = $item['language_code'] ?? null;
+        $existingKeyword->search_partners = $item['search_partners'] ?? false;
+        $existingKeyword->competition = $item['competition'] ?? 'LOW';
+        $existingKeyword->competition_index = $item['competition_index'] ?? 0;
+        $existingKeyword->search_volume = $item['search_volume'] ?? 0;
+        $existingKeyword->low_top_of_page_bid = $item['low_top_of_page_bid'] ?? 0.0;
+        $existingKeyword->high_top_of_page_bid = $item['high_top_of_page_bid'] ?? 0.0;
+        $existingKeyword->cpc = $item['cpc'] ?? 0.0;
+        $existingKeyword->analyzed_at = now();
+
+        // Lagre endringene med `save()`-metoden
+        $existingKeyword->save();
+
+        Log::info("Keyword {$existingKeyword->keyword_uuid} updated successfully with list_uuid: {$existingKeyword->list_uuid}");
+
+        return $existingKeyword;
+    }
+
+
+    /**
+     * Create a new keyword.
+     *
+     * @param array $item
+     * @param string $listUuid
+     * @param string $projectCode
+     * @return Keyword
+     */
+    private function createKeyword(array $item, string $listUuid, string $projectCode): Keyword
+    {
+        $keyword = Keyword::create([
+            'keyword_uuid' => Str::uuid(),
+            'keyword' => $item['keyword'],
+            'list_uuid' => $listUuid, // Sørg for at list_uuid er med her
+            'spell' => $item['spell'] ?? null,
+            'location_code' => $item['location_code'] ?? null,
+            'language_code' => $item['language_code'] ?? null,
+            'search_partners' => $item['search_partners'] ?? false,
+            'competition' => $item['competition'] ?? 'LOW',
+            'competition_index' => $item['competition_index'] ?? 0,
+            'search_volume' => $item['search_volume'] ?? 0,
+            'low_top_of_page_bid' => $item['low_top_of_page_bid'] ?? 0.0,
+            'high_top_of_page_bid' => $item['high_top_of_page_bid'] ?? 0.0,
+            'cpc' => $item['cpc'] ?? 0.0,
+            'project_code' => $projectCode,
+            'analyzed_at' => now(),
+        ]);
+
+        // Log the creation of a new keyword
+        Log::info("Created new keyword with UUID: {$keyword->keyword_uuid} and list_uuid: {$listUuid}");
+
+        return $keyword;
+    }
+
+
+    /**
+     * Store or update keyword search volumes.
+     *
+     * @param string $keywordUuid
+     * @param array $monthlySearches
+     * @param string $projectCode
+     */
+    private function storeKeywordSearchVolumes(string $keywordUuid, array $monthlySearches, string $projectCode)
+    {
+        foreach ($monthlySearches as $searchData) {
+            KeywordSearchVolume::updateOrCreate(
+                [
+                    'keyword_uuid' => $keywordUuid,
+                    'project_code' => $projectCode,
+                    'year' => $searchData['year'],
+                    'month' => $searchData['month'],
+                ],
+                [
+                    'search_volume' => $searchData['search_volume'],
+                ]
+            );
+        }
+    }
+
+
 
     public function handlePingback(Request $request)
     {

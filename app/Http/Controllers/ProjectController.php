@@ -114,7 +114,7 @@ class ProjectController extends Controller
         if ($project->save()) {
 
             $dataForSeoController = new DataForSEOController();
-            $dataForSeoController->createSeoTask($project->project_code);
+            $dataForSeoController->getWebsiteKeywords($project->project_code);
 
             return redirect()->route('projects.index')->with('success', 'Project created successfully.');
         } else {

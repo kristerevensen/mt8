@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\KeywordList;
 use App\Models\Project;
+use App\Models\Keyword;
+use App\Models\KeywordSearchVolume;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class KeywordListController extends Controller
 {
@@ -27,10 +28,7 @@ class KeywordListController extends Controller
         }
 
         // Hent keyword lists knyttet til disse prosjektene
-        $keywordLists = KeywordList::whereIn('project_code', $project_code)
-            ->paginate(10);
-
-
+        $keywordLists = KeywordList::whereIn('project_code', $project_code)->paginate(10);
 
         return Inertia::render('Keywords/Lists/Index', [
             'project' => Project::where('team_id', $currentTeamId)->first(),
@@ -46,8 +44,6 @@ class KeywordListController extends Controller
         return Inertia::render('Keywords/Lists/Create', []);
     }
 
-
-
     /**
      * Display the specified keyword list.
      */
@@ -55,11 +51,40 @@ class KeywordListController extends Controller
     {
         // Hent keyword list ved hjelp av list_uuid
         $keywordList = KeywordList::where('list_uuid', $list_uuid)->firstOrFail();
+        $keywordListName = $keywordList->name;
+
+        // Hent søkeord relatert til denne listen, med relasjonen `monthlySearchVolumes`
+        $keywords = $keywordList->keywords()->with('monthlySearchVolumes')->paginate(10);
+
+        // Hent alle søkeord relatert til listen (uten paginering) for å hente alle volumene til grafen
+        $allKeywords = $keywordList->keywords()->pluck('keyword_uuid');
+
+        // Hent månedlig søkevolum for ALLE søkeord i listen (uavhengig av paginering)
+        $searchVolumes = KeywordSearchVolume::whereIn('keyword_uuid', $allKeywords)
+            ->select('year', 'month', 'search_volume')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->orderBy('search_volume')
+            ->get()
+            ->groupBy(function ($date) {
+                return $date->year . '-' . $date->month;
+            })
+            ->map(function ($group) {
+                return $group->sum('search_volume');
+            })
+            ->toArray();
 
         return Inertia::render('Keywords/Lists/Show', [
             'keywordList' => $keywordList,
+            'keywordListName' => $keywordListName,
+            'keywords' => $keywords, // Paginated keywords for the table
+            'searchVolumes' => $searchVolumes, // All search volumes for the chart
+            'project' => Project::where('project_code', $keywordList->project_code)->first(), // Send prosjektdata
         ]);
     }
+
+
+
 
     /**
      * Show the form for editing the specified keyword list.
@@ -75,7 +100,7 @@ class KeywordListController extends Controller
     }
 
     /**
-     * Update the specified keyword list in storage.
+     * Store a newly created keyword list in storage.
      */
     public function store(Request $request)
     {
@@ -100,6 +125,9 @@ class KeywordListController extends Controller
         }
     }
 
+    /**
+     * Update the specified keyword list in storage.
+     */
     public function update(Request $request, $list_uuid)
     {
         $request->validate([
@@ -125,7 +153,6 @@ class KeywordListController extends Controller
             return redirect()->back()->with('error', 'Failed to update keyword list.');
         }
     }
-
 
     /**
      * Remove the specified keyword list from storage.
