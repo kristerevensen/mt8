@@ -29,7 +29,11 @@ class KeywordListController extends Controller
         }
 
         // Hent keyword lists knyttet til disse prosjektene
-        $keywordLists = KeywordList::whereIn('project_code', $project_code)->paginate(10);
+        //order alphabetically
+
+        $keywordLists = KeywordList::whereIn('project_code', $project_code)
+            ->orderBy('name', 'asc')
+            ->paginate(10);
 
         return Inertia::render('Keywords/Lists/Index', [
             'project' => Project::where('team_id', $currentTeamId)->first(),
@@ -137,27 +141,65 @@ class KeywordListController extends Controller
      * Store a newly created keyword list in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+{
+    // Validering: Sjekker at name er en streng og maks 255 tegn, og description kan være null.
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
 
-        $user = Auth::user();
-        $currentTeamId = $user->current_team_id;
-        $project_code = Project::where('team_id', $currentTeamId)->first()->project_code;
+    $user = Auth::user();
+    $currentTeamId = $user->current_team_id;
+    $project_code = Project::where('team_id', $currentTeamId)->first()->project_code;
 
+    // Sjekk om name inneholder flere lister ved å se etter komma
+    if (strpos($request->name, ',') !== false) {
+        // Hvis det er flere lister, håndter hver liste separat
+        $listNames = explode(',', $request->name);
+        $createdLists = [];
+
+        foreach ($listNames as $listName) {
+            // Trim whitespace rundt hvert navn for å unngå feil.
+            $listName = trim($listName);
+
+            // Sjekk om navnet er gyldig (ikke tomt etter trimming)
+            if (!empty($listName)) {
+                $keywordList = new KeywordList();
+                $keywordList->project_code = $project_code;
+                $keywordList->name = $listName;
+                $keywordList->description = $request->description;
+
+                // Lagre listen og legge til i den opprettede listen hvis den ble lagret
+                if ($keywordList->save()) {
+                    $createdLists[] = $keywordList->name;
+                }
+            }
+        }
+
+        // Hvis minst én liste ble opprettet, redirect til index med suksessmelding
+        if (!empty($createdLists)) {
+            return redirect()->route('keyword-lists.index')
+                ->with('success', 'Keyword lists created successfully: ' . implode(', ', $createdLists));
+        } else {
+            // Hvis ingen lister ble opprettet, returner med feil
+            return redirect()->back()->with('error', 'Failed to create keyword lists.');
+        }
+    } else {
+        // Hvis det er kun én liste, håndter opprettelsen med den opprinnelige koden
         $keywordList = new KeywordList();
         $keywordList->project_code = $project_code;
-        $keywordList->name = $request->name;
+        $keywordList->name = trim($request->name); // Trim whitespace for å unngå feil
         $keywordList->description = $request->description;
 
         if ($keywordList->save()) {
-            return redirect()->route('keyword-lists.index')->with('success', 'Keyword list created successfully.');
+            return redirect()->route('keyword-lists.index')->with('success', 'Keyword list created successfully: ' . $keywordList->name);
         } else {
             return redirect()->back()->with('error', 'Failed to create keyword list.');
         }
     }
+}
+
+
 
     /**
      * Update the specified keyword list in storage.
