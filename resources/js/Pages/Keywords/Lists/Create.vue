@@ -47,7 +47,7 @@ const submitForm = () => {
         <template #title> Keyword List Details </template>
 
         <template #description>
-          Fill in the details for the new keyword list.
+          Fill in the details for the new keyword list. <p>Use comma for creating several in one creation</p>
         </template>
 
         <template #form>
