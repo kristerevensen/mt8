@@ -114,4 +114,23 @@ class Project extends Model
     {
         return $this->belongsTo(Language::class, 'project_language', 'language_code');
     }
+
+    //set up relationship to optimization categories
+    public function optimizationCategories()
+    {
+        return $this->hasMany(OptimizationCategory::class, 'project_code', 'project_code');
+    }
+
+    //set up relationship to optimization criteria
+    public function optimizationCriterias()
+    {
+        return $this->hasMany(OptimizationCriteria::class, 'project_code', 'project_code');
+    }
+
+    //set up relationship to criteria solutions
+    public function criteriaSolutions()
+    {
+        return $this->hasMany(CriteriaSolution::class, 'project_code', 'project_code');
+    }
+
 }

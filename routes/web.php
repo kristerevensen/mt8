@@ -9,6 +9,7 @@ use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GrowthController;
 use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordListController;
+use App\Http\Controllers\OptimizationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\SearchConsoleController;
@@ -91,6 +92,8 @@ Route::middleware([
     Route::post('/keywords/bulk-delete', [KeywordController::class, 'bulkDelete'])->name('keywords.bulk_delete');
     Route::post('/import-keywords', [KeywordController::class, 'importKeywordsFromJson']);
     Route::post('/keywords/website/get', [KeywordController::class, 'getWebsiteKeywords'])->name('website.keywords');
+
+    Route::resource('optimization', OptimizationController::class);
 
 
     /** Growth **/
