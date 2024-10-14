@@ -73,6 +73,8 @@ Route::middleware([
         'destroy',
     ]);
 
+    
+
     /** Technical **/
     Route::resource('technical', TechnicalController::class);
 

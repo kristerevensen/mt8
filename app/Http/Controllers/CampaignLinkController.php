@@ -81,7 +81,7 @@ class CampaignLinkController extends Controller
         $request->validate([
             'landing_page' => 'required|url', // Renamed to match the database field
             'campaign_id' => 'required',
-            'source' => ['required', 'regex:/^(?!https?:\/\/)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/\S*)?$/'],
+            'source' => ['required'],
             'medium' => 'required|string',
             'term' => 'nullable|string',
             'content' => 'nullable|string',
