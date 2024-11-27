@@ -112,6 +112,9 @@ const isActiveGrowth = () => usePage().url.startsWith("/growth");
                     <DropdownLink :href="route('projects.index')">
                       Overview
                     </DropdownLink>
+                    <DropdownLink :href="route('website-spy.index')">
+                      Website Spy
+                    </DropdownLink>
                   </template>
                 </Dropdown>
 

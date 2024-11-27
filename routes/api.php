@@ -16,6 +16,8 @@ Route::post('/pingback', [DataForSEOController::class, 'handlePingback']);
 Route::get('/pingback', [DataForSEOController::class, 'handlePingback']);
 Route::post('/keywords/add-to-list', [KeywordController::class, 'addToList'])->name('keywords.add_to_list');
 
+// Oppdatere location og language
+Route::get('/language-locations', [DataForSEOController::class, 'getLanguagesAndLocations'])->name('update_location_language');
 
 Route::get('/search-console-data', [SearchConsoleController::class, 'index']);
 Route::post('/search-console/fetch-data', [SearchConsoleController::class, 'fetchData']);

@@ -24,6 +24,7 @@
         "@vue-hero-icons/outline": "^1.7.2",
         "@vue-hero-icons/solid": "^1.7.2",
         "chart.js": "^4.4.3",
+        "date-fns": "^4.1.0",
         "vue-chartjs": "^5.3.1"
     }
 }

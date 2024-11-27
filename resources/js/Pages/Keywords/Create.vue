@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Breadcrumbs from "@/Components/Breadcrumbs.vue";
@@ -21,6 +21,17 @@ const breadcrumbs = [
   { name: "Keywords", href: "/keywords", current: false },
   { name: "Create Keywords", current: true },
 ];
+
+// Watch the keywords input to enforce the 1000-line limit
+watch(
+  () => form.keywords,
+  (newKeywords) => {
+    const lines = newKeywords.split("\n");
+    if (lines.length > 1000) {
+      form.keywords = lines.slice(0, 1000).join("\n");
+    }
+  }
+);
 
 // Submit form function
 const submit = () => {
@@ -58,7 +69,7 @@ const submit = () => {
               <label
                 for="keywords"
                 class="block text-sm font-medium text-gray-700"
-                >Keywords (one per line)</label
+                >Keywords (one per line) (Maximum 1000)</label
               >
               <textarea
                 v-model="form.keywords"

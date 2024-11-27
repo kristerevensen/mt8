@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CampaignLinkController;
+use App\Http\Controllers\ConsentCheckerController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DataForSEOController;
@@ -9,11 +10,13 @@ use App\Http\Controllers\GoalsController;
 use App\Http\Controllers\GrowthController;
 use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordListController;
+use App\Http\Controllers\MarketingHealthCheckerController;
 use App\Http\Controllers\OptimizationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\SearchConsoleController;
 use App\Http\Controllers\TechnicalController;
+use App\Http\Controllers\WebsiteSpyController;
 use App\Mail\Invitation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +31,8 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+
 
 Route::middleware([
     'auth:sanctum',
@@ -73,10 +78,36 @@ Route::middleware([
         'destroy',
     ]);
 
-    
+    // open route for consent checker
+    Route::get('/consent-checker', [ConsentCheckerController::class, 'index'])
+    ->name('consent-checker');
+    Route::post('/consent-checker/analyze', [ConsentCheckerController::class, 'analyze'])
+    ->name('consent-checker.analyze');
+
+    Route::get('/marketing-health-checker', [MarketingHealthCheckerController::class, 'index'])
+    ->name('marketing-health-checker');
+    Route::post('/marketing-health-checker/analyze', [MarketingHealthCheckerController::class, 'analyze'])
+    ->name('marketing-health-checker.analyze');
+
 
     /** Technical **/
     Route::resource('technical', TechnicalController::class);
+
+    /** Website Spy **/
+    Route::resource('website-spy', WebsiteSpyController::class)->names([
+        'index' => 'website-spy.index',
+        'create' => 'website-spy.create',
+        'store' => 'website-spy.store',
+        'show' => 'website-spy.show',
+        'edit' => 'website-spy.edit',
+        'update' => 'website-spy.update',
+        'destroy' => 'website-spy.destroy',
+    ]);
+    // Legg til denne ruten utenfor Route::resource
+    Route::get('/website-spy', [WebsiteSpyController::class, 'index'])->name('website-spy.index');
+    Route::get('/website-spy/{uuid}', [WebsiteSpyController::class, 'show'])->name('website-spy.show');
+    Route::post('/website-spy/spy', [WebsiteSpyController::class, 'spy'])->name('website-spy.spy');
+
 
     /** Content **/
     Route::resource('content', ContentController::class);

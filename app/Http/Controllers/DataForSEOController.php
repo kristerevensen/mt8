@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Keyword;
 use App\Models\KeywordList;
 use App\Models\KeywordSearchVolume;
+use App\Models\LanguageLocation;
 use Illuminate\Http\Request;
 use App\Models\Location;
 use App\Models\Language;
@@ -75,6 +76,73 @@ class DataForSEOController extends Controller
             return response()->json(['error' => 'Failed to fetch locations'], 500);
         }
     }
+    /**
+     * Fetch languages and locations from DataForSEO and store them in the database.
+     * Database table: language_location
+     *  $result = $client->get('/v3/dataforseo_labs/locations_and_languages');
+     *
+     */
+    public function getLanguagesAndLocations()
+    {
+        $login = Config::get('dataforseo.login');
+        $password = Config::get('dataforseo.password');
+        $baseUrl = Config::get('dataforseo.base_url');
+
+        $credentials = base64_encode("{$login}:{$password}");
+
+        try {
+            // Gjør API-kall til DataForSEO
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => "Basic {$credentials}",
+                    'Content-Type' => 'application/json',
+                ])
+                ->get("{$baseUrl}/v3/dataforseo_labs/locations_and_languages");
+            //dd($response->json());
+            // Sjekk om API-kallet var vellykket
+            if ($response->successful()) {
+                $data = $response->json();
+
+                // Truncate tabellen før nye data legges inn
+                LanguageLocation::truncate();
+
+                // Sjekk om oppgaven er vellykket og har resultater
+                if (isset($data['tasks']) && count($data['tasks']) > 0) {
+                    foreach ($data['tasks'][0]['result'] as $location) {
+                        // Iterer gjennom hver tilgjengelig lokasjon
+                        foreach ($location['available_languages'] as $language) {
+                            // Lagre eller oppdaterer språk- og lokasjonsdata i databasen
+                            LanguageLocation::updateOrCreate(
+                                [
+                                    'location_code' => $location['location_code'],
+                                    'language_code' => $language['language_code'],
+                                ],
+                                [
+                                    'location_name' => $location['location_name'],
+                                    'location_code_parent' => $location['location_code_parent'],
+                                    'country_iso_code' => $location['country_iso_code'],
+                                    'location_type' => $location['location_type'],
+                                    'language_name' => $language['language_name'],
+                                    'language_code' => $language['language_code'],
+                                ]
+                            );
+                        }
+                    }
+
+                    return response()->json(['message' => 'Languages and locations fetched and stored successfully']);
+                } else {
+                    return response()->json(['error' => 'No tasks or results found in the response'], 500);
+                }
+            } else {
+                // Returner feilmelding hvis API-kallet mislykkes
+                return response()->json(['error' => 'Failed to fetch data from API'], 500);
+            }
+        } catch (\Exception $e) {
+            // Logg feil og returner feilmelding
+            Log::error('Error fetching languages and locations: ' . $e->getMessage());
+            return response()->json(['error' => 'Error fetching data'], 500);
+        }
+    }
 
 
 
@@ -110,8 +178,6 @@ class DataForSEOController extends Controller
             return response()->json(['error' => 'Failed to fetch languages'], 500);
         }
     }
-
-
 
     public function getWebsiteKeywords($projectId)
     {
@@ -183,10 +249,13 @@ class DataForSEOController extends Controller
             $password = config('dataforseo.password');
             $credentials = base64_encode("{$login}:{$password}");
 
+            $projectDomain = preg_replace('#^https?://#', '', $project->project_domain);
+            $projectDomain = parse_url($projectDomain, PHP_URL_HOST) ?? $projectDomain;
+
             $post_array = [
                 [
                     "location_code" => $project->project_location_code,
-                    "target" => $project->project_domain,
+                    "target" => $projectDomain,
                     'target_type' => 'site',
                     'tag' => 'Website Keywords',
                 ],
@@ -278,7 +347,6 @@ class DataForSEOController extends Controller
 
         return $existingKeyword;
     }
-
 
     /**
      * Create a new keyword.
