@@ -44,6 +44,14 @@ return [
             'throw' => false,
         ],
 
+        'website_analysis' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/website_analysis'),
+            'url' => env('APP_URL').'/storage/website_analysis',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -16,18 +16,43 @@ class Location extends Model
      */
     protected $fillable = [
         'location_name',
-        'country_iso_code', // Add this field to allow mass assignment
-        'location_code', // Add this field to allow mass assignment
-        'location_code_parent', // Add this field to allow mass assignment
-        'location_type', // Add this field to allow mass assignment
+        'country_iso_code',
+        'location_code',
+        'location_code_parent',
+        'location_type',
     ];
 
-    // You can add additional methods and relationships here if needed
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'location_code' => 'integer',
+    ];
 
+    /**
+     * The languages that belong to the location.
+     */
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class, 'language_location', 'location_code', 'language_code')
+                    ->withPivot(['location_name', 'country_iso_code', 'language_name']);
+    }
 
-    // set relationship to project, where many projects will have one location
+    /**
+     * The projects that belong to the location.
+     */
     public function projects()
     {
         return $this->hasMany(Project::class, 'project_location_code', 'location_code');
+    }
+
+    /**
+     * The analyses that belong to the location.
+     */
+    public function analyses()
+    {
+        return $this->hasMany(WebsiteAnalysis::class, 'location_code', 'location_code');
     }
 }

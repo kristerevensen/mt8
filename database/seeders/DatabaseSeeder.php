@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\LanguageLocationSeeder;
 
 class DatabaseSeeder extends Seeder
 {

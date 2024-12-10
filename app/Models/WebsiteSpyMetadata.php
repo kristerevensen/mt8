@@ -5,34 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class WebsiteSpyTechnologies extends Model
+class WebsiteSpyMetadata extends Model
 {
     use HasFactory;
-
-    protected $table = 'website_spy_technologies';
 
     protected $fillable = [
         'uuid',
         'project_code',
         'website_analysis_id',
-        'name',
-        'version',
-        'icon',
-        'website',
-        'cpe',
-        'categories'
+        'title',
+        'description',
+        'meta_keywords',
+        'phone_numbers',
+        'email_addresses',
+        'social_media_urls',
+        'country_iso_code',
+        'language_code'
     ];
 
     protected $casts = [
-        'categories' => 'array',
+        'phone_numbers' => 'array',
+        'email_addresses' => 'array',
+        'social_media_urls' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
 
-    /**
-     * Get the website analysis that owns this technology.
-     */
-    public function websiteAnalysis()
+    public function analysis()
     {
         return $this->belongsTo(WebsiteAnalysis::class, 'website_analysis_id');
     }

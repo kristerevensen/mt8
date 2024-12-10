@@ -15,15 +15,32 @@ class Language extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'language_name', // Add this field to allow mass assignment
-        'language_code', // Add this field to allow mass assignment
+        'language_name',
+        'language_code',
     ];
 
-    // You can add additional methods and relationships here if needed
+    /**
+     * The locations that belong to the language.
+     */
+    public function locations()
+    {
+        return $this->belongsToMany(Location::class, 'language_location', 'language_code', 'location_code')
+                    ->withPivot(['location_name', 'country_iso_code', 'language_name']);
+    }
 
-    // set relationship to project, where many projects will have one language
+    /**
+     * The projects that belong to the language.
+     */
     public function projects()
     {
         return $this->hasMany(Project::class, 'project_language', 'language_code');
+    }
+
+    /**
+     * The analyses that belong to the language.
+     */
+    public function analyses()
+    {
+        return $this->hasMany(WebsiteAnalysis::class, 'language_code', 'language_code');
     }
 }

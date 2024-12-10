@@ -21,6 +21,7 @@ class ProjectsTableSeeder extends Seeder
             'project_language' => 'no_NB',
             'project_country' => 'NO',
             'project_category' => serialize('Brand'),
+            'project_location_code' => 2578, // Norway
             'owner_id' => 1,
             'team_id' => 1,
         ]);
@@ -32,6 +33,7 @@ class ProjectsTableSeeder extends Seeder
             'project_language' => 'no_NB',
             'project_country' => 'NO',
             'project_category' => serialize('Brand'),
+            'project_location_code' => 20044, // Oslo
             'owner_id' => 1,
             'team_id' => 3,
         ]);
@@ -43,6 +45,7 @@ class ProjectsTableSeeder extends Seeder
             'project_language' => 'no_NB',
             'project_country' => 'NO',
             'project_category' => serialize('Brand'),
+            'project_location_code' => 20045, // Bergen
             'owner_id' => 1,
             'team_id' => 2,
         ]);

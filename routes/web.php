@@ -32,8 +32,6 @@ Route::get('/', function () {
     ]);
 });
 
-
-
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -42,6 +40,15 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::prefix('search-console')->name('search-console.')->group(function () {
+        Route::get('/', [SearchConsoleController::class, 'index'])->name('index');
+        Route::get('/connect', [SearchConsoleController::class, 'connect'])->name('connect');
+        Route::get('/callback', [SearchConsoleController::class, 'callback'])->name('callback');
+        Route::post('/disconnect', [SearchConsoleController::class, 'disconnect'])->name('disconnect');
+        Route::get('/fetch', [SearchConsoleController::class, 'fetchDataPage'])->name('fetch');
+        Route::post('/fetch', [SearchConsoleController::class, 'fetchData'])->name('fetch.store');
+    });
 
     /** Projects **/
     Route::get('projects/{project}/settings', [ProjectController::class, 'settings'])->name('projects.settings');
@@ -65,7 +72,6 @@ Route::middleware([
 
     Route::post('/pingback', [DataForSEOController::class, 'handlePingback']);
     Route::get('/pingback', [DataForSEOController::class, 'handlePingback']);
-
 
 
     Route::resource('pages', DataController::class)->only([
@@ -93,21 +99,14 @@ Route::middleware([
     /** Technical **/
     Route::resource('technical', TechnicalController::class);
 
-    /** Website Spy **/
-    Route::resource('website-spy', WebsiteSpyController::class)->names([
-        'index' => 'website-spy.index',
-        'create' => 'website-spy.create',
-        'store' => 'website-spy.store',
-        'show' => 'website-spy.show',
-        'edit' => 'website-spy.edit',
-        'update' => 'website-spy.update',
-        'destroy' => 'website-spy.destroy',
-    ]);
-    // Legg til denne ruten utenfor Route::resource
-    Route::get('/website-spy', [WebsiteSpyController::class, 'index'])->name('website-spy.index');
-    Route::get('/website-spy/{uuid}', [WebsiteSpyController::class, 'show'])->name('website-spy.show');
-    Route::post('/website-spy/spy', [WebsiteSpyController::class, 'spy'])->name('website-spy.spy');
-
+    /** Website Spy Routes **/
+    Route::get('website-spy', [WebsiteSpyController::class, 'index'])->name('website-spy.index');
+    Route::post('website-spy', [WebsiteSpyController::class, 'spy'])->name('website-spy.spy');
+    Route::get('website-spy/{uuid}', [WebsiteSpyController::class, 'show'])->name('website-spy.show');
+    Route::post('website-spy/analyze', [WebsiteSpyController::class, 'analyze'])->name('website-spy.analyze');
+    Route::get('website-spy/analysis/{uuid}', [WebsiteSpyController::class, 'showAnalysis'])->name('website-spy.show-analysis');
+    Route::post('website-spy/technologies', [WebsiteSpyController::class, 'fetchDomainTechnologies'])->name('website-spy.technologies');
+    Route::delete('website-spy/competitors/{uuid}/{id}', [WebsiteSpyController::class, 'deleteCompetitor'])->name('website-spy.delete-competitor');
 
     /** Content **/
     Route::resource('content', ContentController::class);
@@ -134,6 +133,16 @@ Route::middleware([
     Route::resource('growth', GrowthController::class);
 
     Route::resource('goals', GoalsController::class);
+});
+
+// Search Console routes
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+    Route::prefix('search-console')->name('search-console.')->group(function () {
+        Route::get('/', [SearchConsoleController::class, 'index'])->name('index');
+        Route::get('/fetch', [SearchConsoleController::class, 'fetchDataPage'])->name('fetch');
+        Route::post('/fetch', [SearchConsoleController::class, 'fetchData'])->name('fetch.store');
+        Route::get('/historical', [SearchConsoleController::class, 'getHistoricalData'])->name('historical');
+    });
 });
 
 /** API  **/
