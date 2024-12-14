@@ -139,9 +139,8 @@ Route::middleware([
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     Route::prefix('search-console')->name('search-console.')->group(function () {
         Route::get('/', [SearchConsoleController::class, 'index'])->name('index');
-        Route::get('/fetch', [SearchConsoleController::class, 'fetchDataPage'])->name('fetch');
-        Route::post('/fetch', [SearchConsoleController::class, 'fetchData'])->name('fetch.store');
-        Route::get('/historical', [SearchConsoleController::class, 'getHistoricalData'])->name('historical');
+        Route::get('/connect', [SearchConsoleController::class, 'connect'])->name('connect');
+        Route::get('/callback', [SearchConsoleController::class, 'callback'])->name('callback');
     });
 });
 
