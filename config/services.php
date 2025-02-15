@@ -45,8 +45,21 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/search-console/callback',
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
         'project_id' => env('GOOGLE_PROJECT_ID'),
+        'oauth' => [
+            'client_id' => env('GOOGLE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            'redirect' => env('GOOGLE_REDIRECT_URI'),
+        ],
+    ],
+
+    'socialite' => [
+        'google' => [
+            'client_id' => env('GOOGLE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            'redirect' => env('GOOGLE_REDIRECT_URI'),
+        ],
     ],
 
 ];

@@ -1,11 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticationCard from '@/Components/AuthenticationCard.vue';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
-import Checkbox from '@/Components/Checkbox.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
 const form = useForm({
@@ -24,89 +20,137 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head title="Opprett konto" />
 
-    <AuthenticationCard>
-        <template #logo>
-            <AuthenticationCardLogo />
-        </template>
+    <div class="min-h-screen flex">
+        <!-- Left Side - Registration Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-gray-50">
+            <div class="w-full max-w-md space-y-8">
+                <!-- Logo and Header -->
+                <div class="text-center">
+                  <!-- Measuretank logo som tekst -->
+                    <h1 class="text-4xl font-bold text-gray-900">Measuretank</h1>
+                </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="name" value="Name" />
-                <TextInput
-                    id="name"
-                    v-model="form.name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
-                <InputError class="mt-2" :message="form.errors.name" />
-            </div>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
-                <TextInput
-                    id="email"
-                    v-model="form.email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="username"
-                />
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="new-password"
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
 
-            <div class="mt-4">
-                <InputLabel for="password_confirmation" value="Confirm Password" />
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="new-password"
-                />
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
-            </div>
+                <!-- Registration Form -->
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- Name Field -->
+                    <div>
+                        <TextInput
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:ring-gray-500"
+                            required
+                            placeholder="Navn"
+                            autofocus
+                            autocomplete="name"
+                        />
+                        <InputError class="mt-2" :message="form.errors.name" />
+                    </div>
 
-            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-4">
-                <InputLabel for="terms">
-                    <div class="flex items-center">
-                        <Checkbox id="terms" v-model:checked="form.terms" name="terms" required />
+                    <!-- Email Field -->
+                    <div>
+                        <TextInput
+                            id="email"
+                            v-model="form.email"
+                            type="email"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:ring-gray-500"
+                            required
+                            placeholder="E-post"
+                            autocomplete="username"
+                        />
+                        <InputError class="mt-2" :message="form.errors.email" />
+                    </div>
 
-                        <div class="ms-2">
-                            I agree to the <a target="_blank" :href="route('terms.show')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Terms of Service</a> and <a target="_blank" :href="route('policy.show')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Privacy Policy</a>
+                    <!-- Password Field -->
+                    <div>
+                        <TextInput
+                            id="password"
+                            v-model="form.password"
+                            type="password"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:ring-gray-500"
+                            required
+                            placeholder="Passord"
+                            autocomplete="new-password"
+                        />
+                        <InputError class="mt-2" :message="form.errors.password" />
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div>
+                        <TextInput
+                            id="password_confirmation"
+                            v-model="form.password_confirmation"
+                            type="password"
+                            class="block w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-500 focus:ring-gray-500"
+                            required
+                            placeholder="Bekreft passord"
+                            autocomplete="new-password"
+                        />
+                        <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input
+                                id="terms"
+                                v-model="form.terms"
+                                name="terms"
+                                type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+                                required
+                            />
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="terms" class="text-gray-600">
+                                Jeg godtar <a target="_blank" :href="route('terms.show')" class="font-medium text-gray-900 hover:text-gray-700">vilkårene</a> og <a target="_blank" :href="route('policy.show')" class="font-medium text-gray-900 hover:text-gray-700">personvernerklæringen</a>
+                            </label>
+                            <InputError class="mt-2" :message="form.errors.terms" />
                         </div>
                     </div>
-                    <InputError class="mt-2" :message="form.errors.terms" />
-                </InputLabel>
-            </div>
 
-            <div class="flex items-center justify-end mt-4">
-                <Link :href="route('login')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Already registered?
-                </Link>
+                    <!-- Submit Button -->
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                    >
+                        <span v-if="form.processing">Oppretter konto...</span>
+                        <span v-else>Opprett konto</span>
+                    </button>
 
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Register
-                </PrimaryButton>
+                    <!-- Login Link -->
+                    <p class="text-center text-sm text-gray-600">
+                        Har du allerede en konto?
+                        <Link 
+                            :href="route('login')" 
+                            class="font-medium text-gray-900 hover:text-gray-700"
+                        >
+                            Logg inn her
+                        </Link>
+                    </p>
+                </form>
             </div>
-        </form>
-    </AuthenticationCard>
+        </div>
+
+        <!-- Right Side - Dark Theme with Quote -->
+        <div class="hidden lg:flex lg:w-1/2 relative bg-gray-900">
+            <div class="relative w-full h-full flex items-center justify-center p-12">
+                <div class="max-w-md text-center text-white">
+                    <p class="text-lg font-medium mb-2">
+                        "Beyond UI: It's the design equivalent of discovering the theory of relativity for your creativity."
+                    </p>
+                    <p class="text-sm text-gray-400">- Albert Einstein</p>
+                </div>
+            </div>
+            
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-[radial-gradient(#ffffff33_1px,#00091d_1px)] bg-[size:20px_20px]"></div>
+        </div>
+    </div>
 </template>
